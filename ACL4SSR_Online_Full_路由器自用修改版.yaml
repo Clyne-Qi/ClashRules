@@ -1,90 +1,84 @@
+[Overwrite]
+
+# 运行时从机场订阅的 proxies 中读取真实节点名，并写入对应策略组。
+# 不再依赖 Mihomo/OpenClash 的 include-all-proxies + filter。
+# 若未筛到目标节点，则回退到机场原有“节点选择”策略组，避免配置失效。
+
+ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='OpenAI-US'}['proxies']" "begin names=(Value['proxies']||[]).map{|p| p.is_a?(Hash) ? p['name'] : nil}.compact.select{|n| n =~ /(美国|美國|United States)/i && n !~ /(v3|10倍|5倍|5x)/i}; fallback=(Value['proxy-groups']||[]).find{|g| g.is_a?(Hash) && g['name'].to_s =~ /节点选择/}; names.empty? ? [fallback&&fallback['name']].compact : names end"
+ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='Google-US'}['proxies']" "begin names=(Value['proxies']||[]).map{|p| p.is_a?(Hash) ? p['name'] : nil}.compact.select{|n| n =~ /(美国|美國|United States)/i && n !~ /(v3|10倍|5倍|5x)/i}; fallback=(Value['proxy-groups']||[]).find{|g| g.is_a?(Hash) && g['name'].to_s =~ /节点选择/}; names.empty? ? [fallback&&fallback['name']].compact : names end"
+ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='YouTube'}['proxies']" "begin names=(Value['proxies']||[]).map{|p| p.is_a?(Hash) ? p['name'] : nil}.compact.select{|n| n =~ /(香港|日本|美国|美國|United States)/i && n !~ /(v3|10倍|5倍|5x)/i}; fallback=(Value['proxy-groups']||[]).find{|g| g.is_a?(Hash) && g['name'].to_s =~ /节点选择/}; names.empty? ? [fallback&&fallback['name']].compact : names end"
+ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='GitHub'}['proxies']" "begin names=(Value['proxies']||[]).map{|p| p.is_a?(Hash) ? p['name'] : nil}.compact.select{|n| n =~ /(香港|美国|美國|United States)/i && n !~ /(v3|10倍|5倍|5x)/i}; fallback=(Value['proxy-groups']||[]).find{|g| g.is_a?(Hash) && g['name'].to_s =~ /节点选择/}; names.empty? ? [fallback&&fallback['name']].compact : names end"
+ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='Game-HK-JP'}['proxies']" "begin names=(Value['proxies']||[]).map{|p| p.is_a?(Hash) ? p['name'] : nil}.compact.select{|n| n =~ /(香港|日本)/i && n !~ /(v3|10倍|5倍|5x)/i}; fallback=(Value['proxy-groups']||[]).find{|g| g.is_a?(Hash) && g['name'].to_s =~ /节点选择/}; names.empty? ? [fallback&&fallback['name']].compact : names end"
+
+
 [YAML]
 
 # ============================================================
 # Clyne-Qi / OpenClash 增量覆写规则
 #
-# 用途：
-# 1. 保留机场订阅原有节点、策略组与 rules，不整体替换。
-# 2. 仅追加下面几个策略组，并将指定规则前置到原订阅 rules。
-# 3. OpenAI / Google 只提供美国节点，手动选择。
-# 4. YouTube 只提供香港 / 日本 / 美国节点，手动选择。
-# 5. GitHub 只提供香港 / 美国节点，手动选择。
-# 6. 游戏平台只提供香港 / 日本节点，手动选择具体线路。
-#
-# 说明：
-# - 策略组名使用 ASCII，避免部分 OpenClash 环境对中文/Emoji 名称处理异常。
-# - 当前不使用 exclude-filter，先以最简 filter 规则验证节点分类。
-# - 所有新增策略组均改为手动选择，避免自动切换出口 IP。
+# 设计：
+# 1. 保留机场订阅原有节点、策略组与 rules。
+# 2. 只新增个人分流策略组，并把对应规则前置。
+# 3. 节点列表由上方 [Overwrite] 在启动时从机场真实 proxies 动态生成。
+# 4. 所有新增策略组均为手动选择，避免自动切换出口 IP。
 # ============================================================
-
-
-# ------------------------------------------------------------
-# 新增策略组
-# ------------------------------------------------------------
 
 proxy-groups+:
 
-  # OpenAI / ChatGPT：只显示美国节点，手动选择
+  # OpenAI / ChatGPT：美国节点，手动选择
   - name: OpenAI-US
     type: select
-    include-all-proxies: true
-    filter: "(?i)美国|美國|United States"
+    proxies:
+      - DIRECT
 
-  # Google：只显示美国节点，手动选择
+  # Google：美国节点，手动选择
   - name: Google-US
     type: select
-    include-all-proxies: true
-    filter: "(?i)美国|美國|United States"
+    proxies:
+      - DIRECT
 
-  # YouTube：只显示香港 / 日本 / 美国节点，手动选择
-  - name: YouTube-Auto
+  # YouTube：香港 / 日本 / 美国节点，手动选择
+  - name: YouTube
     type: select
-    include-all-proxies: true
-    filter: "(?i)香港|日本|美国|美國|United States"
+    proxies:
+      - DIRECT
 
-  # GitHub：只显示香港 / 美国节点，手动选择
-  - name: GitHub-Auto
+  # GitHub：香港 / 美国节点，手动选择
+  - name: GitHub
     type: select
-    include-all-proxies: true
-    filter: "(?i)香港|美国|美國|United States"
+    proxies:
+      - DIRECT
 
-  # 游戏平台：只显示香港 / 日本节点，手动选择具体线路
+  # 游戏平台：香港 / 日本节点，手动选择
   - name: Game-HK-JP
     type: select
-    include-all-proxies: true
-    filter: "(?i)香港|日本"
+    proxies:
+      - DIRECT
 
 
-# ------------------------------------------------------------
-# 前置规则
-# OpenClash 的 +rules 会把这些规则插入机场原有 rules 的最前面。
-# ------------------------------------------------------------
-
+# 前置规则：优先于机场订阅原有 rules
 +rules:
 
-  # ----- OpenAI / ChatGPT -----
-  # 显式域名优先写在 GeoSite 前，避免 chatgpt.com 再掉入漏网之鱼。
+  # OpenAI / ChatGPT
   - DOMAIN-SUFFIX,chatgpt.com,OpenAI-US
   - DOMAIN-SUFFIX,openai.com,OpenAI-US
   - DOMAIN-SUFFIX,oaistatic.com,OpenAI-US
   - DOMAIN-SUFFIX,oaiusercontent.com,OpenAI-US
   - GEOSITE,openai,OpenAI-US
 
-  # ----- YouTube -----
-  # 放在 Google 前面，避免 YouTube 流量先被 Google 大类规则命中。
-  - GEOSITE,youtube,YouTube-Auto
+  # YouTube 放在 Google 前面
+  - GEOSITE,youtube,YouTube
 
-  # ----- Google -----
+  # Google
   - GEOSITE,google,Google-US
 
-  # ----- GitHub -----
-  # 显式覆盖网页、Raw、静态资源与下载域名，再由 GeoSite 补充其余域名。
-  - DOMAIN-SUFFIX,github.com,GitHub-Auto
-  - DOMAIN-SUFFIX,githubusercontent.com,GitHub-Auto
-  - DOMAIN-SUFFIX,githubassets.com,GitHub-Auto
-  - GEOSITE,github,GitHub-Auto
+  # GitHub
+  - DOMAIN-SUFFIX,github.com,GitHub
+  - DOMAIN-SUFFIX,githubusercontent.com,GitHub
+  - DOMAIN-SUFFIX,githubassets.com,GitHub
+  - GEOSITE,github,GitHub
 
-  # ----- 游戏平台 -----
+  # 游戏平台
   - GEOSITE,steam,Game-HK-JP
   - GEOSITE,epicgames,Game-HK-JP
   - GEOSITE,origin,Game-HK-JP
