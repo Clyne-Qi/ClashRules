@@ -6,10 +6,10 @@
 # 用途：
 # 1. 保留机场订阅原有节点、策略组与 rules，不整体替换。
 # 2. 仅追加下面几个策略组，并将指定规则前置到原订阅 rules。
-# 3. OpenAI / Google 固定使用美国节点。
-# 4. YouTube 在香港 / 日本 / 美国节点中自动选择。
-# 5. GitHub 在香港 / 日本节点中自动选择。
-# 6. 游戏平台使用香港 / 日本节点，可手动选择具体线路。
+# 3. OpenAI / Google 只提供美国节点，手动选择。
+# 4. YouTube 只提供香港 / 日本 / 美国节点，手动选择。
+# 5. GitHub 在香港 / 美国节点中自动测速选择。
+# 6. 游戏平台只提供香港 / 日本节点，手动选择具体线路。
 #
 # 说明：
 # - 策略组名使用 ASCII，避免部分 OpenClash 环境对中文/Emoji 名称处理异常。
@@ -24,41 +24,32 @@
 
 proxy-groups+:
 
-  # OpenAI / ChatGPT：美国节点自动优选
+  # OpenAI / ChatGPT：只显示美国节点，手动选择
   - name: OpenAI-US
-    type: url-test
-    include-all: true
+    type: select
+    include-all-proxies: true
     filter: "(?i)美|美国|美國|US|United States|波特兰|波特蘭|达拉斯|達拉斯|俄勒冈|俄勒岡|凤凰城|鳳凰城|费利蒙|費利蒙|硅谷|矽谷|拉斯维加斯|拉斯維加斯|洛杉矶|洛杉磯|圣何塞|聖何塞|圣克拉拉|聖克拉拉|西雅图|西雅圖|芝加哥|纽约|紐約"
     exclude-filter: "(?i)v3|10倍|5倍|5x"
-    url: https://www.gstatic.com/generate_204
-    interval: 300
-    tolerance: 50
 
-  # Google：美国节点自动优选
+  # Google：只显示美国节点，手动选择
   - name: Google-US
-    type: url-test
-    include-all: true
+    type: select
+    include-all-proxies: true
     filter: "(?i)美|美国|美國|US|United States|波特兰|波特蘭|达拉斯|達拉斯|俄勒冈|俄勒岡|凤凰城|鳳凰城|费利蒙|費利蒙|硅谷|矽谷|拉斯维加斯|拉斯維加斯|洛杉矶|洛杉磯|圣何塞|聖何塞|圣克拉拉|聖克拉拉|西雅图|西雅圖|芝加哥|纽约|紐約"
     exclude-filter: "(?i)v3|10倍|5倍|5x"
-    url: https://www.gstatic.com/generate_204
-    interval: 300
-    tolerance: 50
 
-  # YouTube：香港 / 日本 / 美国节点自动优选
+  # YouTube：只显示香港 / 日本 / 美国节点，手动选择
   - name: YouTube-Auto
-    type: url-test
-    include-all: true
+    type: select
+    include-all-proxies: true
     filter: "(?i)港|HK|Hong Kong|HongKong|日本|东京|東京|大阪|JP|Japan|美|美国|美國|US|United States|洛杉矶|洛杉磯|西雅图|西雅圖|圣何塞|聖何塞|硅谷|矽谷"
     exclude-filter: "(?i)v3|10倍|5倍|5x"
-    url: https://www.gstatic.com/generate_204
-    interval: 300
-    tolerance: 50
 
-  # GitHub：只在香港 / 日本节点中自动优选
+  # GitHub：只在香港 / 美国节点中自动优选
   - name: GitHub-Auto
     type: url-test
-    include-all: true
-    filter: "(?i)港|HK|Hong Kong|HongKong|日本|东京|東京|大阪|JP|Japan"
+    include-all-proxies: true
+    filter: "(?i)港|HK|Hong Kong|HongKong|美|美国|美國|US|United States|波特兰|波特蘭|达拉斯|達拉斯|俄勒冈|俄勒岡|凤凰城|鳳凰城|费利蒙|費利蒙|硅谷|矽谷|拉斯维加斯|拉斯維加斯|洛杉矶|洛杉磯|圣何塞|聖何塞|圣克拉拉|聖克拉拉|西雅图|西雅圖|芝加哥|纽约|紐約"
     exclude-filter: "(?i)v3|10倍|5倍|5x"
     url: https://www.gstatic.com/generate_204
     interval: 300
@@ -67,7 +58,7 @@ proxy-groups+:
   # 游戏平台：只显示香港 / 日本节点，手动选择具体线路
   - name: Game-HK-JP
     type: select
-    include-all: true
+    include-all-proxies: true
     filter: "(?i)港|HK|Hong Kong|HongKong|日本|东京|東京|大阪|JP|Japan"
     exclude-filter: "(?i)v3|10倍|5倍|5x"
 
