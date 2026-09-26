@@ -13,8 +13,8 @@
 #
 # 说明：
 # - 策略组名使用 ASCII，避免部分 OpenClash 环境对中文/Emoji 名称处理异常。
-# - 节点过滤规则沿用原自用配置的国家关键词习惯。
-# - v3 / 5倍 / 10倍等高倍率节点默认排除。
+# - 节点筛选改用 exclude-filter 反向白名单，兼容当前 Mihomo/OpenClash 实际行为。
+# - 非目标地区节点，以及 v3 / 5倍 / 10倍等高倍率节点默认排除。
 # ============================================================
 
 
@@ -28,29 +28,25 @@ proxy-groups+:
   - name: OpenAI-US
     type: select
     include-all-proxies: true
-    filter: "(?i)美|美国|美國|US|United States|波特兰|波特蘭|达拉斯|達拉斯|俄勒冈|俄勒岡|凤凰城|鳳凰城|费利蒙|費利蒙|硅谷|矽谷|拉斯维加斯|拉斯維加斯|洛杉矶|洛杉磯|圣何塞|聖何塞|圣克拉拉|聖克拉拉|西雅图|西雅圖|芝加哥|纽约|紐約"
-    exclude-filter: "(?i)v3|10倍|5倍|5x"
+    exclude-filter: "(?i)^(?!.*(?:美国|美國|🇺🇸|United States|波特兰|波特蘭|达拉斯|達拉斯|俄勒冈|俄勒岡|凤凰城|鳳凰城|费利蒙|費利蒙|硅谷|矽谷|拉斯维加斯|拉斯維加斯|洛杉矶|洛杉磯|圣何塞|聖何塞|圣克拉拉|聖克拉拉|西雅图|西雅圖|芝加哥|纽约|紐約)).*$|(?:v3|10倍|5倍|5x)"
 
   # Google：只显示美国节点，手动选择
   - name: Google-US
     type: select
     include-all-proxies: true
-    filter: "(?i)美|美国|美國|US|United States|波特兰|波特蘭|达拉斯|達拉斯|俄勒冈|俄勒岡|凤凰城|鳳凰城|费利蒙|費利蒙|硅谷|矽谷|拉斯维加斯|拉斯維加斯|洛杉矶|洛杉磯|圣何塞|聖何塞|圣克拉拉|聖克拉拉|西雅图|西雅圖|芝加哥|纽约|紐約"
-    exclude-filter: "(?i)v3|10倍|5倍|5x"
+    exclude-filter: "(?i)^(?!.*(?:美国|美國|🇺🇸|United States|波特兰|波特蘭|达拉斯|達拉斯|俄勒冈|俄勒岡|凤凰城|鳳凰城|费利蒙|費利蒙|硅谷|矽谷|拉斯维加斯|拉斯維加斯|洛杉矶|洛杉磯|圣何塞|聖何塞|圣克拉拉|聖克拉拉|西雅图|西雅圖|芝加哥|纽约|紐約)).*$|(?:v3|10倍|5倍|5x)"
 
   # YouTube：只显示香港 / 日本 / 美国节点，手动选择
   - name: YouTube-Auto
     type: select
     include-all-proxies: true
-    filter: "(?i)港|HK|Hong Kong|HongKong|日本|东京|東京|大阪|JP|Japan|美|美国|美國|US|United States|洛杉矶|洛杉磯|西雅图|西雅圖|圣何塞|聖何塞|硅谷|矽谷"
-    exclude-filter: "(?i)v3|10倍|5倍|5x"
+    exclude-filter: "(?i)^(?!.*(?:香港|🇭🇰|HK|Hong Kong|HongKong|日本|🇯🇵|东京|東京|大阪|JP|Japan|美国|美國|🇺🇸|United States|波特兰|波特蘭|达拉斯|達拉斯|俄勒冈|俄勒岡|凤凰城|鳳凰城|费利蒙|費利蒙|硅谷|矽谷|拉斯维加斯|拉斯維加斯|洛杉矶|洛杉磯|圣何塞|聖何塞|圣克拉拉|聖克拉拉|西雅图|西雅圖|芝加哥|纽约|紐約)).*$|(?:v3|10倍|5倍|5x)"
 
   # GitHub：只在香港 / 美国节点中自动优选
   - name: GitHub-Auto
     type: url-test
     include-all-proxies: true
-    filter: "(?i)港|HK|Hong Kong|HongKong|美|美国|美國|US|United States|波特兰|波特蘭|达拉斯|達拉斯|俄勒冈|俄勒岡|凤凰城|鳳凰城|费利蒙|費利蒙|硅谷|矽谷|拉斯维加斯|拉斯維加斯|洛杉矶|洛杉磯|圣何塞|聖何塞|圣克拉拉|聖克拉拉|西雅图|西雅圖|芝加哥|纽约|紐約"
-    exclude-filter: "(?i)v3|10倍|5倍|5x"
+    exclude-filter: "(?i)^(?!.*(?:香港|🇭🇰|HK|Hong Kong|HongKong|美国|美國|🇺🇸|United States|波特兰|波特蘭|达拉斯|達拉斯|俄勒冈|俄勒岡|凤凰城|鳳凰城|费利蒙|費利蒙|硅谷|矽谷|拉斯维加斯|拉斯維加斯|洛杉矶|洛杉磯|圣何塞|聖何塞|圣克拉拉|聖克拉拉|西雅图|西雅圖|芝加哥|纽约|紐約)).*$|(?:v3|10倍|5倍|5x)"
     url: https://www.gstatic.com/generate_204
     interval: 300
     tolerance: 50
@@ -59,8 +55,7 @@ proxy-groups+:
   - name: Game-HK-JP
     type: select
     include-all-proxies: true
-    filter: "(?i)港|HK|Hong Kong|HongKong|日本|东京|東京|大阪|JP|Japan"
-    exclude-filter: "(?i)v3|10倍|5倍|5x"
+    exclude-filter: "(?i)^(?!.*(?:香港|🇭🇰|HK|Hong Kong|HongKong|日本|🇯🇵|东京|東京|大阪|JP|Japan)).*$|(?:v3|10倍|5倍|5x)"
 
 
 # ------------------------------------------------------------
