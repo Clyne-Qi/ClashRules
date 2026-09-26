@@ -8,7 +8,7 @@
 # 2. 仅追加下面几个策略组，并将指定规则前置到原订阅 rules。
 # 3. OpenAI / Google 只提供美国节点，手动选择。
 # 4. YouTube 只提供香港 / 日本 / 美国节点，手动选择。
-# 5. GitHub 在香港 / 美国节点中自动测速选择。
+# 5. GitHub 只提供香港 / 美国节点，手动选择。
 # 6. 游戏平台只提供香港 / 日本节点，手动选择具体线路。
 #
 # 说明：
@@ -28,34 +28,31 @@ proxy-groups+:
   - name: OpenAI-US
     type: select
     include-all-proxies: true
-    exclude-filter: "(?i)^(?!.*(?:美国|美國|🇺🇸|United States|波特兰|波特蘭|达拉斯|達拉斯|俄勒冈|俄勒岡|凤凰城|鳳凰城|费利蒙|費利蒙|硅谷|矽谷|拉斯维加斯|拉斯維加斯|洛杉矶|洛杉磯|圣何塞|聖何塞|圣克拉拉|聖克拉拉|西雅图|西雅圖|芝加哥|纽约|紐約)).*$|(?:v3|10倍|5倍|5x)"
+    filter: "(?i)美国|美國|United States"
 
   # Google：只显示美国节点，手动选择
   - name: Google-US
     type: select
     include-all-proxies: true
-    exclude-filter: "(?i)^(?!.*(?:美国|美國|🇺🇸|United States|波特兰|波特蘭|达拉斯|達拉斯|俄勒冈|俄勒岡|凤凰城|鳳凰城|费利蒙|費利蒙|硅谷|矽谷|拉斯维加斯|拉斯維加斯|洛杉矶|洛杉磯|圣何塞|聖何塞|圣克拉拉|聖克拉拉|西雅图|西雅圖|芝加哥|纽约|紐約)).*$|(?:v3|10倍|5倍|5x)"
+    filter: "(?i)美国|美國|United States"
 
   # YouTube：只显示香港 / 日本 / 美国节点，手动选择
   - name: YouTube-Auto
     type: select
     include-all-proxies: true
-    exclude-filter: "(?i)^(?!.*(?:香港|🇭🇰|HK|Hong Kong|HongKong|日本|🇯🇵|东京|東京|大阪|JP|Japan|美国|美國|🇺🇸|United States|波特兰|波特蘭|达拉斯|達拉斯|俄勒冈|俄勒岡|凤凰城|鳳凰城|费利蒙|費利蒙|硅谷|矽谷|拉斯维加斯|拉斯維加斯|洛杉矶|洛杉磯|圣何塞|聖何塞|圣克拉拉|聖克拉拉|西雅图|西雅圖|芝加哥|纽约|紐約)).*$|(?:v3|10倍|5倍|5x)"
+    filter: "(?i)香港|日本|美国|美國|United States"
 
-  # GitHub：只在香港 / 美国节点中自动优选
+  # GitHub：只显示香港 / 美国节点，手动选择
   - name: GitHub-Auto
-    type: url-test
+    type: select
     include-all-proxies: true
-    exclude-filter: "(?i)^(?!.*(?:香港|🇭🇰|HK|Hong Kong|HongKong|美国|美國|🇺🇸|United States|波特兰|波特蘭|达拉斯|達拉斯|俄勒冈|俄勒岡|凤凰城|鳳凰城|费利蒙|費利蒙|硅谷|矽谷|拉斯维加斯|拉斯維加斯|洛杉矶|洛杉磯|圣何塞|聖何塞|圣克拉拉|聖克拉拉|西雅图|西雅圖|芝加哥|纽约|紐約)).*$|(?:v3|10倍|5倍|5x)"
-    url: https://www.gstatic.com/generate_204
-    interval: 300
-    tolerance: 50
+    filter: "(?i)香港|美国|美國|United States"
 
   # 游戏平台：只显示香港 / 日本节点，手动选择具体线路
   - name: Game-HK-JP
     type: select
     include-all-proxies: true
-    exclude-filter: "(?i)^(?!.*(?:香港|🇭🇰|HK|Hong Kong|HongKong|日本|🇯🇵|东京|東京|大阪|JP|Japan)).*$|(?:v3|10倍|5倍|5x)"
+    filter: "(?i)香港|日本"
 
 
 # ------------------------------------------------------------
