@@ -99,6 +99,7 @@ proxy-groups+:
   - DOMAIN-SUFFIX,pixiv.net,Pixiv-All
   - DOMAIN-SUFFIX,pximg.net,Pixiv-All
   - DOMAIN-SUFFIX,fanbox.cc,Pixiv-All
+  - DOMAIN-SUFFIX,ads-pixiv.net,Pixiv-All
 
   # Steam 国内下载/CDN：直连
   # 参考 ACL4SSR 的 SteamCN 规则，必须放在 Steam 总规则之前。
