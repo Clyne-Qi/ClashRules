@@ -8,7 +8,7 @@ ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='OpenAI-US'}['pro
 ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='Google-US'}['proxies']" "begin names=(Value['proxies']||[]).map{|p| p.is_a?(Hash) ? p['name'] : nil}.compact.select{|n| n =~ /(\u7f8e\u56fd|\u7f8e\u570b|United States)/i && n !~ /(v3|10\u500d|5\u500d|5x)/i}; fallback=(Value['proxy-groups']||[]).find{|g| g.is_a?(Hash) && g['name'].to_s =~ /\u8282\u70b9\u9009\u62e9/}; names.empty? ? [fallback&&fallback['name']].compact : names end"
 ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='YouTube'}['proxies']" "begin names=(Value['proxies']||[]).map{|p| p.is_a?(Hash) ? p['name'] : nil}.compact.select{|n| n =~ /(\u9999\u6e2f|\u65e5\u672c|\u7f8e\u56fd|\u7f8e\u570b|United States)/i && n !~ /(v3|10\u500d|5\u500d|5x)/i}; fallback=(Value['proxy-groups']||[]).find{|g| g.is_a?(Hash) && g['name'].to_s =~ /\u8282\u70b9\u9009\u62e9/}; names.empty? ? [fallback&&fallback['name']].compact : names end"
 ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='GitHub'}['proxies']" "begin names=(Value['proxies']||[]).map{|p| p.is_a?(Hash) ? p['name'] : nil}.compact.select{|n| n =~ /(\u9999\u6e2f|\u7f8e\u56fd|\u7f8e\u570b|United States)/i && n !~ /(v3|10\u500d|5\u500d|5x)/i}; fallback=(Value['proxy-groups']||[]).find{|g| g.is_a?(Hash) && g['name'].to_s =~ /\u8282\u70b9\u9009\u62e9/}; names.empty? ? [fallback&&fallback['name']].compact : names end"
-ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='Pixiv-HK-JP'}['proxies']" "begin names=(Value['proxies']||[]).map{|p| p.is_a?(Hash) ? p['name'] : nil}.compact.select{|n| n =~ /(\u9999\u6e2f|\u65e5\u672c)/i && n !~ /(v3|10\u500d|5\u500d|5x)/i}; fallback=(Value['proxy-groups']||[]).find{|g| g.is_a?(Hash) && g['name'].to_s =~ /\u8282\u70b9\u9009\u62e9/}; names.empty? ? [fallback&&fallback['name']].compact : names end"
+ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='Pixiv-All'}['proxies']" "(Value['proxies']||[]).map{|p| p.is_a?(Hash) ? p['name'] : nil}.compact"
 ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='Steam-HK-JP'}['proxies']" "begin names=(Value['proxies']||[]).map{|p| p.is_a?(Hash) ? p['name'] : nil}.compact.select{|n| n =~ /(\u9999\u6e2f|\u65e5\u672c)/i && n !~ /(v3|10\u500d|5\u500d|5x)/i}; fallback=(Value['proxy-groups']||[]).find{|g| g.is_a?(Hash) && g['name'].to_s =~ /\u8282\u70b9\u9009\u62e9/}; names.empty? ? [fallback&&fallback['name']].compact : names end"
 ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='Game-HK-JP'}['proxies']" "begin names=(Value['proxies']||[]).map{|p| p.is_a?(Hash) ? p['name'] : nil}.compact.select{|n| n =~ /(\u9999\u6e2f|\u65e5\u672c)/i && n !~ /(v3|10\u500d|5\u500d|5x)/i}; fallback=(Value['proxy-groups']||[]).find{|g| g.is_a?(Hash) && g['name'].to_s =~ /\u8282\u70b9\u9009\u62e9/}; names.empty? ? [fallback&&fallback['name']].compact : names end"
 
@@ -24,7 +24,7 @@ ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='Game-HK-JP'}['pr
 # 3. 节点列表由上方 [Overwrite] 在启动时从机场真实 proxies 动态生成。
 # 4. 所有新增策略组均为手动选择，避免自动切换出口 IP。
 # 5. Steam 单独分组：国内下载/CDN 直连，商店/社区/创意工坊页面走港日代理。
-# 6. Pixiv 单独分组：pixiv.net / pximg.net / fanbox.cc 走港日代理。
+# 6. Pixiv 单独分组：pixiv.net / pximg.net / fanbox.cc 可手动选择机场全部节点。
 # ============================================================
 
 proxy-groups+:
@@ -53,8 +53,8 @@ proxy-groups+:
     proxies:
       - DIRECT
 
-  # Pixiv：香港 / 日本节点，手动选择
-  - name: Pixiv-HK-JP
+  # Pixiv：全部机场节点，手动选择
+  - name: Pixiv-All
     type: select
     proxies:
       - DIRECT
@@ -94,11 +94,11 @@ proxy-groups+:
   - DOMAIN-SUFFIX,githubassets.com,GitHub
   - GEOSITE,github,GitHub
 
-  # Pixiv / FANBOX：香港 / 日本代理
+  # Pixiv / FANBOX：使用 Pixiv-All 手动选择任意机场节点
   # 参考 ACL4SSR Pixiv.list：pixiv.net / pximg.net / fanbox.cc
-  - DOMAIN-SUFFIX,pixiv.net,Pixiv-HK-JP
-  - DOMAIN-SUFFIX,pximg.net,Pixiv-HK-JP
-  - DOMAIN-SUFFIX,fanbox.cc,Pixiv-HK-JP
+  - DOMAIN-SUFFIX,pixiv.net,Pixiv-All
+  - DOMAIN-SUFFIX,pximg.net,Pixiv-All
+  - DOMAIN-SUFFIX,fanbox.cc,Pixiv-All
 
   # Steam 国内下载/CDN：直连
   # 参考 ACL4SSR 的 SteamCN 规则，必须放在 Steam 总规则之前。
