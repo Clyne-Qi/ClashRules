@@ -25,6 +25,7 @@ ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='Game-HK-JP'}['pr
 # 4. 所有新增策略组均为手动选择，避免自动切换出口 IP。
 # 5. Steam 单独分组：国内下载/CDN 直连，商店/社区/创意工坊页面走港日代理。
 # 6. Pixiv 单独分组：pixiv.net / pximg.net / fanbox.cc 可手动选择机场全部节点。
+# 7. PS Remote Play / PlayStation 在路由器端强制直连，避免远程游玩被代理接管。
 # ============================================================
 
 proxy-groups+:
@@ -74,6 +75,16 @@ proxy-groups+:
 
 # 前置规则：优先于机场订阅原有 rules
 +rules:
+
+  # PS Remote Play / PlayStation：路由器无法按 Windows 进程名匹配，
+  # 因此将 PlayStation/Sony 域名与官方 Remote Play 端口前置直连。
+  # Sony 官方：Remote Play 使用 UDP 8572；旧版 PS4 Remote Play 使用 9295~9304。
+  - GEOSITE,playstation,DIRECT
+  - GEOSITE,sony,DIRECT
+  - AND,((NETWORK,UDP),(DST-PORT,8572)),DIRECT
+  - AND,((NETWORK,UDP),(SRC-PORT,8572)),DIRECT
+  - DST-PORT,9295-9304,DIRECT
+  - SRC-PORT,9295-9304,DIRECT
 
   # OpenAI / ChatGPT
   - DOMAIN-SUFFIX,chatgpt.com,OpenAI-US
@@ -127,6 +138,4 @@ proxy-groups+:
   - GEOSITE,epicgames,Game-HK-JP
   - GEOSITE,origin,Game-HK-JP
   - GEOSITE,ea,Game-HK-JP
-  - GEOSITE,sony,Game-HK-JP
-  - GEOSITE,playstation,Game-HK-JP
   - GEOSITE,nintendo,Game-HK-JP
