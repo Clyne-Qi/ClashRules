@@ -25,7 +25,7 @@ ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='Game-HK-JP'}['pr
 # 4. 所有新增策略组均为手动选择，避免自动切换出口 IP。
 # 5. Steam 单独分组：国内下载/CDN 直连，商店/社区/创意工坊页面走港日代理。
 # 6. Pixiv 单独分组：pixiv.net / pximg.net / fanbox.cc 可手动选择机场全部节点。
-# 7. PC 端 Remote Play 由进程规则直连；路由器端仅放行指定电脑 192.168.6.250 的 Remote Play 端口，PlayStation/Sony 其余流量仍按游戏平台规则走代理。
+# 7. 电脑 192.168.6.250 已由本机 Clash 自行分流；路由器端对该电脑全部直连，避免 Remote Play 与其他实时流量被二次代理。PlayStation/Sony 其余设备流量仍按游戏平台规则走代理。
 # ============================================================
 
 proxy-groups+:
@@ -76,12 +76,10 @@ proxy-groups+:
 # 前置规则：优先于机场订阅原有 rules
 +rules:
 
-  # PS Remote Play：仅放行指定 PC（192.168.6.250）的 Remote Play 端口。
-  # 不对 PlayStation / Sony 域名做全局直连，避免影响主机商店继续走 Game-HK-JP。
-  - AND,((SRC-IP-CIDR,192.168.6.250/32),(NETWORK,UDP),(DST-PORT,8572)),DIRECT
-  - AND,((SRC-IP-CIDR,192.168.6.250/32),(NETWORK,UDP),(SRC-PORT,8572)),DIRECT
-  - AND,((SRC-IP-CIDR,192.168.6.250/32),(DST-PORT,9295-9304)),DIRECT
-  - AND,((SRC-IP-CIDR,192.168.6.250/32),(SRC-PORT,9295-9304)),DIRECT
+  # PC（192.168.6.250）整机直连：
+  # 该电脑已由本机 Clash 负责应用级/域名分流，路由器不再二次代理。
+  # 这样 Remote Play 的动态 TCP/UDP 会话也不会被 OpenClash 重新接管。
+  - SRC-IP-CIDR,192.168.6.250/32,DIRECT
 
   # OpenAI / ChatGPT
   - DOMAIN-SUFFIX,chatgpt.com,OpenAI-US
