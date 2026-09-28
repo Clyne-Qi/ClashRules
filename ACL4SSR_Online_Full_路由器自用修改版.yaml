@@ -25,7 +25,7 @@ ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='Game-HK-JP'}['pr
 # 4. 所有新增策略组均为手动选择，避免自动切换出口 IP。
 # 5. Steam 单独分组：国内下载/CDN 直连，商店/社区/创意工坊页面走港日代理。
 # 6. Pixiv 单独分组：pixiv.net / pximg.net / fanbox.cc 可手动选择机场全部节点。
-# 7. PS5 固定 IP 为 192.168.6.250。仅将 Remote Play 相关端口直连；PlayStation/Sony 商店与其他流量仍按游戏平台规则走代理。
+# 7. PS5 固定 IP 为 192.168.6.250。PS5 的 UDP 实时流量全部直连，避免 Remote Play / 游戏 UDP 被代理接管；TCP 的 PlayStation/Sony 流量仍按游戏平台规则走代理。
 # ============================================================
 
 proxy-groups+:
@@ -76,12 +76,10 @@ proxy-groups+:
 # 前置规则：优先于机场订阅原有 rules
 +rules:
 
-  # PS5（192.168.6.250）Remote Play 端口直连。
-  # 不对 PS5 整机直连，避免 PS Store / Sony / PlayStation 流量绕过 Game-HK-JP。
-  - AND,((SRC-IP-CIDR,192.168.6.250/32),(NETWORK,UDP),(DST-PORT,8572)),DIRECT
-  - AND,((SRC-IP-CIDR,192.168.6.250/32),(NETWORK,UDP),(SRC-PORT,8572)),DIRECT
-  - AND,((SRC-IP-CIDR,192.168.6.250/32),(DST-PORT,9295-9304)),DIRECT
-  - AND,((SRC-IP-CIDR,192.168.6.250/32),(SRC-PORT,9295-9304)),DIRECT
+  # PS5（192.168.6.250）全部 UDP 直连：
+  # Remote Play / 联机游戏等实时 UDP 不进入代理，避免 NAT 路径和出口发生变化。
+  # PS Store / Sony / PlayStation 的 TCP/HTTPS 仍会继续匹配后面的 Game-HK-JP。
+  - AND,((SRC-IP-CIDR,192.168.6.250/32),(NETWORK,UDP)),DIRECT
 
   # OpenAI / ChatGPT
   - DOMAIN-SUFFIX,chatgpt.com,OpenAI-US
