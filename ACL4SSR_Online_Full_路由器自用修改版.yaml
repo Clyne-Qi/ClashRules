@@ -11,6 +11,7 @@ ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='GitHub'}['proxie
 ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='Pixiv-All'}['proxies']" "(Value['proxies']||[]).map{|p| p.is_a?(Hash) ? p['name'] : nil}.compact"
 ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='Steam-HK-JP'}['proxies']" "begin names=(Value['proxies']||[]).map{|p| p.is_a?(Hash) ? p['name'] : nil}.compact.select{|n| n =~ /(\u9999\u6e2f|\u65e5\u672c)/i && n !~ /(v3|10\u500d|5\u500d|5x)/i}; fallback=(Value['proxy-groups']||[]).find{|g| g.is_a?(Hash) && g['name'].to_s =~ /\u8282\u70b9\u9009\u62e9/}; names.empty? ? [fallback&&fallback['name']].compact : names end"
 ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='Game-HK-JP'}['proxies']" "begin names=(Value['proxies']||[]).map{|p| p.is_a?(Hash) ? p['name'] : nil}.compact.select{|n| n =~ /(\u9999\u6e2f|\u65e5\u672c)/i && n !~ /(v3|10\u500d|5\u500d|5x)/i}; fallback=(Value['proxy-groups']||[]).find{|g| g.is_a?(Hash) && g['name'].to_s =~ /\u8282\u70b9\u9009\u62e9/}; names.empty? ? [fallback&&fallback['name']].compact : names end"
+ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='PS5-TCP-HK'}['proxies']" "begin names=(Value['proxies']||[]).map{|p| p.is_a?(Hash) ? p['name'] : nil}.compact.select{|n| n =~ /(\u9999\u6e2f|Hong Kong|HongKong)/i && n !~ /(v3|10\u500d|5\u500d|5x)/i}; fallback=(Value['proxy-groups']||[]).find{|g| g.is_a?(Hash) && g['name'].to_s =~ /\u8282\u70b9\u9009\u62e9/}; names.empty? ? [fallback&&fallback['name']].compact : names end"
 
 
 [YAML]
@@ -25,6 +26,7 @@ ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='Game-HK-JP'}['pr
 # 4. 所有新增策略组均为手动选择，避免自动切换出口 IP。
 # 5. Steam 单独分组：国内下载/CDN 直连，商店/社区/创意工坊页面走港日代理。
 # 6. Pixiv 单独分组：pixiv.net / pximg.net / fanbox.cc 可手动选择机场全部节点。
+# 7. PS5（192.168.6.250）：TCP 固定走香港节点，UDP 全部直连。
 # ============================================================
 
 proxy-groups+:
@@ -59,6 +61,12 @@ proxy-groups+:
     proxies:
       - DIRECT
 
+  # PS5 TCP：仅香港节点，手动选择
+  - name: PS5-TCP-HK
+    type: select
+    proxies:
+      - DIRECT
+
   # Steam：香港 / 日本节点，手动选择（仅商店/社区等非下载流量）
   - name: Steam-HK-JP
     type: select
@@ -74,6 +82,11 @@ proxy-groups+:
 
 # 前置规则：优先于机场订阅原有 rules
 +rules:
+
+  # PS5（192.168.6.250）协议分流
+  # TCP：走香港节点；UDP：直连
+  - AND,((SRC-IP-CIDR,192.168.6.250/32),(NETWORK,UDP)),DIRECT
+  - AND,((SRC-IP-CIDR,192.168.6.250/32),(NETWORK,TCP)),PS5-TCP-HK
 
   # OpenAI / ChatGPT
   - DOMAIN-SUFFIX,chatgpt.com,OpenAI-US
