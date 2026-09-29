@@ -76,6 +76,9 @@ proxy-groups+:
 # 前置规则：优先于机场订阅原有 rules
 +rules:
 
+  # 自有服务器域名：直连，避免被代理接管
+  - DOMAIN-SUFFIX,clyne.top,DIRECT
+
   # PS5（192.168.6.250）全部直连
   - AND,((SRC-IP-CIDR,192.168.6.250/32),(NETWORK,UDP)),DIRECT
   - AND,((SRC-IP-CIDR,192.168.6.250/32),(NETWORK,TCP)),DIRECT
