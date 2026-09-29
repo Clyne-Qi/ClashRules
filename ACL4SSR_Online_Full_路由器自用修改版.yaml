@@ -1,6 +1,6 @@
 [Overwrite]
-# OpenClash 覆写模块：从订阅节点动态填充地区组，并让原有分流组共用总选择。
-# “🔰 节点选择”选地区；地区组内选具体节点。直连规则仍保持原有直连。
+# OpenClash 覆写模块：从订阅节点动态填充地区组，其他地区节点直接列入总选择。
+# “🔰 节点选择”可选地区或其他地区的具体节点；地区组内选具体节点。直连规则仍保持原有直连。
 ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🇭🇰 香港节点'}['proxies']" "begin ns=(Value['proxies']||[]).map{|p| p.is_a?(Hash) ? p['name'] : nil}.compact.select{|n| n =~ /🇭🇰|香港|Hong.?Kong|(?:^|[^A-Za-z])HK(?:[^A-Za-z]|$)/i}; ns.empty? ? ['REJECT'] : ns end"
 ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🇺🇸 美国节点'}['proxies']" "begin ns=(Value['proxies']||[]).map{|p| p.is_a?(Hash) ? p['name'] : nil}.compact.select{|n| n =~ /🇺🇸|美国|美國|United States|(?:^|[^A-Za-z])US(?:[^A-Za-z]|$)/i}; ns.empty? ? ['REJECT'] : ns end"
 ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🇯🇵 日本节点'}['proxies']" "begin ns=(Value['proxies']||[]).map{|p| p.is_a?(Hash) ? p['name'] : nil}.compact.select{|n| n =~ /🇯🇵|日本|Japan|(?:^|[^A-Za-z])JP(?:[^A-Za-z]|$)/i}; ns.empty? ? ['REJECT'] : ns end"
@@ -8,18 +8,17 @@ ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🇨🇳 台湾�
 ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🇸🇬 新加坡节点'}['proxies']" "begin ns=(Value['proxies']||[]).map{|p| p.is_a?(Hash) ? p['name'] : nil}.compact.select{|n| n =~ /🇸🇬|新加坡|狮城|獅城|Singapore|(?:^|[^A-Za-z])SG(?:[^A-Za-z]|$)/i}; ns.empty? ? ['REJECT'] : ns end"
 ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🇲🇾 马来西亚节点'}['proxies']" "begin ns=(Value['proxies']||[]).map{|p| p.is_a?(Hash) ? p['name'] : nil}.compact.select{|n| n =~ /🇲🇾|马来西亚|馬來西亞|Malaysia|(?:^|[^A-Za-z])MY(?:[^A-Za-z]|$)/i}; ns.empty? ? ['REJECT'] : ns end"
 ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🇰🇷 韩国节点'}['proxies']" "begin ns=(Value['proxies']||[]).map{|p| p.is_a?(Hash) ? p['name'] : nil}.compact.select{|n| n =~ /🇰🇷|韩国|韓國|Korea|(?:^|[^A-Za-z])KR(?:[^A-Za-z]|$)/i}; ns.empty? ? ['REJECT'] : ns end"
-ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🌍 其他节点'}['proxies']" "begin ns=(Value['proxies']||[]).map{|p| p.is_a?(Hash) ? p['name'] : nil}.compact.select{|n| n !~ /🇭🇰|香港|Hong.?Kong|(?:^|[^A-Za-z])HK(?:[^A-Za-z]|$)|🇺🇸|美国|美國|United States|(?:^|[^A-Za-z])US(?:[^A-Za-z]|$)|🇯🇵|日本|Japan|(?:^|[^A-Za-z])JP(?:[^A-Za-z]|$)|🇹🇼|台湾|臺灣|Taiwan|(?:^|[^A-Za-z])TW(?:[^A-Za-z]|$)|🇸🇬|新加坡|狮城|獅城|Singapore|(?:^|[^A-Za-z])SG(?:[^A-Za-z]|$)|🇲🇾|马来西亚|馬來西亞|Malaysia|(?:^|[^A-Za-z])MY(?:[^A-Za-z]|$)|🇰🇷|韩国|韓國|Korea|(?:^|[^A-Za-z])KR(?:[^A-Za-z]|$)/i && n !~ /剩余|流量|到期|套餐|官网|订阅|客服/}; ns.empty? ? ['REJECT'] : ns end"
 
-# 原订阅分流组只保留组级选择；默认项沿用原配置。
-ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🔰 节点选择'}['proxies']" "['♻️ 自动选择','🇭🇰 香港节点','🇺🇸 美国节点','🇯🇵 日本节点','🇨🇳 台湾节点','🇸🇬 新加坡节点','🇲🇾 马来西亚节点','🇰🇷 韩国节点','🌍 其他节点','DIRECT']"
-ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🌍 国外媒体'}['proxies']" "['🔰 节点选择','🇭🇰 香港节点','🇺🇸 美国节点','🇯🇵 日本节点','🇨🇳 台湾节点','🇸🇬 新加坡节点','🇲🇾 马来西亚节点','🇰🇷 韩国节点','🌍 其他节点','♻️ 自动选择','🎯 全球直连']"
-ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🌏 国内媒体'}['proxies']" "['🎯 全球直连','🔰 节点选择','🇭🇰 香港节点','🇺🇸 美国节点','🇯🇵 日本节点','🇨🇳 台湾节点','🇸🇬 新加坡节点','🇲🇾 马来西亚节点','🇰🇷 韩国节点','🌍 其他节点','♻️ 自动选择']"
-ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='Ⓜ️ 微软服务'}['proxies']" "['🎯 全球直连','🔰 节点选择','🇭🇰 香港节点','🇺🇸 美国节点','🇯🇵 日本节点','🇨🇳 台湾节点','🇸🇬 新加坡节点','🇲🇾 马来西亚节点','🇰🇷 韩国节点','🌍 其他节点','♻️ 自动选择']"
-ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='📲 电报信息'}['proxies']" "['🔰 节点选择','🇭🇰 香港节点','🇺🇸 美国节点','🇯🇵 日本节点','🇨🇳 台湾节点','🇸🇬 新加坡节点','🇲🇾 马来西亚节点','🇰🇷 韩国节点','🌍 其他节点','♻️ 自动选择','🎯 全球直连']"
-ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🍎 苹果服务'}['proxies']" "['🔰 节点选择','🇭🇰 香港节点','🇺🇸 美国节点','🇯🇵 日本节点','🇨🇳 台湾节点','🇸🇬 新加坡节点','🇲🇾 马来西亚节点','🇰🇷 韩国节点','🌍 其他节点','♻️ 自动选择','🎯 全球直连']"
-ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🎯 全球直连'}['proxies']" "['DIRECT','🔰 节点选择','🇭🇰 香港节点','🇺🇸 美国节点','🇯🇵 日本节点','🇨🇳 台湾节点','🇸🇬 新加坡节点','🇲🇾 马来西亚节点','🇰🇷 韩国节点','🌍 其他节点']"
-ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🛑 全球拦截'}['proxies']" "['🔰 节点选择','REJECT','DIRECT','🇭🇰 香港节点','🇺🇸 美国节点','🇯🇵 日本节点','🇨🇳 台湾节点','🇸🇬 新加坡节点','🇲🇾 马来西亚节点','🇰🇷 韩国节点','🌍 其他节点']"
-ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🐟 漏网之鱼'}['proxies']" "['🔰 节点选择','🇭🇰 香港节点','🇺🇸 美国节点','🇯🇵 日本节点','🇨🇳 台湾节点','🇸🇬 新加坡节点','🇲🇾 马来西亚节点','🇰🇷 韩国节点','🌍 其他节点','♻️ 自动选择','🎯 全球直连']"
+# 原订阅分流组使用组级选择；总选择额外列出其他地区的具体节点。
+ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🔰 节点选择'}['proxies']" "begin base=['♻️ 自动选择','🇭🇰 香港节点','🇺🇸 美国节点','🇯🇵 日本节点','🇨🇳 台湾节点','🇸🇬 新加坡节点','🇲🇾 马来西亚节点','🇰🇷 韩国节点']; names=(Value['proxies']||[]).map{|p| p.is_a?(Hash) ? p['name'] : nil}.compact; extras=names.select{|n| n !~ /🇭🇰|香港|Hong.?Kong|(?:^|[^A-Za-z])HK(?:[^A-Za-z]|$)|🇺🇸|美国|美國|United States|(?:^|[^A-Za-z])US(?:[^A-Za-z]|$)|🇯🇵|日本|Japan|(?:^|[^A-Za-z])JP(?:[^A-Za-z]|$)|🇹🇼|台湾|臺灣|Taiwan|(?:^|[^A-Za-z])TW(?:[^A-Za-z]|$)|🇸🇬|新加坡|狮城|獅城|Singapore|(?:^|[^A-Za-z])SG(?:[^A-Za-z]|$)|🇲🇾|马来西亚|馬來西亞|Malaysia|(?:^|[^A-Za-z])MY(?:[^A-Za-z]|$)|🇰🇷|韩国|韓國|Korea|(?:^|[^A-Za-z])KR(?:[^A-Za-z]|$)/i && n !~ /剩余|流量|到期|套餐|官网|订阅|客服/}; base+extras+['DIRECT'] end"
+ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🌍 国外媒体'}['proxies']" "['🔰 节点选择','🇭🇰 香港节点','🇺🇸 美国节点','🇯🇵 日本节点','🇨🇳 台湾节点','🇸🇬 新加坡节点','🇲🇾 马来西亚节点','🇰🇷 韩国节点','♻️ 自动选择','🎯 全球直连']"
+ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🌏 国内媒体'}['proxies']" "['🎯 全球直连','🔰 节点选择','🇭🇰 香港节点','🇺🇸 美国节点','🇯🇵 日本节点','🇨🇳 台湾节点','🇸🇬 新加坡节点','🇲🇾 马来西亚节点','🇰🇷 韩国节点','♻️ 自动选择']"
+ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='Ⓜ️ 微软服务'}['proxies']" "['🎯 全球直连','🔰 节点选择','🇭🇰 香港节点','🇺🇸 美国节点','🇯🇵 日本节点','🇨🇳 台湾节点','🇸🇬 新加坡节点','🇲🇾 马来西亚节点','🇰🇷 韩国节点','♻️ 自动选择']"
+ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='📲 电报信息'}['proxies']" "['🔰 节点选择','🇭🇰 香港节点','🇺🇸 美国节点','🇯🇵 日本节点','🇨🇳 台湾节点','🇸🇬 新加坡节点','🇲🇾 马来西亚节点','🇰🇷 韩国节点','♻️ 自动选择','🎯 全球直连']"
+ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🍎 苹果服务'}['proxies']" "['🔰 节点选择','🇭🇰 香港节点','🇺🇸 美国节点','🇯🇵 日本节点','🇨🇳 台湾节点','🇸🇬 新加坡节点','🇲🇾 马来西亚节点','🇰🇷 韩国节点','♻️ 自动选择','🎯 全球直连']"
+ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🎯 全球直连'}['proxies']" "['DIRECT','🔰 节点选择','🇭🇰 香港节点','🇺🇸 美国节点','🇯🇵 日本节点','🇨🇳 台湾节点','🇸🇬 新加坡节点','🇲🇾 马来西亚节点','🇰🇷 韩国节点']"
+ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🛑 全球拦截'}['proxies']" "['🔰 节点选择','REJECT','DIRECT','🇭🇰 香港节点','🇺🇸 美国节点','🇯🇵 日本节点','🇨🇳 台湾节点','🇸🇬 新加坡节点','🇲🇾 马来西亚节点','🇰🇷 韩国节点']"
+ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🐟 漏网之鱼'}['proxies']" "['🔰 节点选择','🇭🇰 香港节点','🇺🇸 美国节点','🇯🇵 日本节点','🇨🇳 台湾节点','🇸🇬 新加坡节点','🇲🇾 马来西亚节点','🇰🇷 韩国节点','♻️ 自动选择','🎯 全球直连']"
 
 [YAML]
 
@@ -29,8 +28,8 @@ ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🐟 漏网之�
 # 设计：
 # 1. 保留机场订阅原有节点、策略组与 rules。
 # 2. 新增个人分流策略组并前置对应规则；订阅原有分流组由上方 [Overwrite] 改为地区组选择。
-# 3. 地区节点列表由上方 [Overwrite] 在启动时从机场真实 proxies 动态生成。
-# 4. 新增分流组默认跟随“🔰 节点选择”；该组选择地区后，在地区组内手动选择具体节点。
+# 3. 地区组和总选择中的其他地区节点由上方 [Overwrite] 从机场真实 proxies 动态生成。
+# 4. 新增分流组默认跟随“🔰 节点选择”；该组可选择地区，也可直接选择其他地区的具体节点。
 # 5. Steam 单独分组：国内下载/CDN 直连，商店/社区/创意工坊页面跟随统一选择。
 # 6. Pixiv 单独分组：pixiv.net / pximg.net / fanbox.cc 跟随统一选择。
 # 7. PS5（192.168.6.250）：TCP / UDP 全部直连，用于排查代理分流对连接质量的影响。
@@ -58,7 +57,6 @@ proxy-groups+:
       - 🇸🇬 新加坡节点
       - 🇲🇾 马来西亚节点
       - 🇰🇷 韩国节点
-      - 🌍 其他节点
       - ♻️ 自动选择
       - DIRECT
   # Google：默认跟随统一选择
@@ -73,7 +71,6 @@ proxy-groups+:
       - 🇸🇬 新加坡节点
       - 🇲🇾 马来西亚节点
       - 🇰🇷 韩国节点
-      - 🌍 其他节点
       - ♻️ 自动选择
       - DIRECT
   # 📹 油管视频：默认跟随统一选择
@@ -88,7 +85,6 @@ proxy-groups+:
       - 🇸🇬 新加坡节点
       - 🇲🇾 马来西亚节点
       - 🇰🇷 韩国节点
-      - 🌍 其他节点
       - ♻️ 自动选择
       - DIRECT
   # 💻 GitHub：默认跟随统一选择
@@ -103,7 +99,6 @@ proxy-groups+:
       - 🇸🇬 新加坡节点
       - 🇲🇾 马来西亚节点
       - 🇰🇷 韩国节点
-      - 🌍 其他节点
       - ♻️ 自动选择
       - DIRECT
   # Pixiv：默认跟随统一选择
@@ -118,7 +113,6 @@ proxy-groups+:
       - 🇸🇬 新加坡节点
       - 🇲🇾 马来西亚节点
       - 🇰🇷 韩国节点
-      - 🌍 其他节点
       - ♻️ 自动选择
       - DIRECT
   # Steam：默认跟随统一选择（仅商店/社区等非下载流量）
@@ -133,11 +127,10 @@ proxy-groups+:
       - 🇸🇬 新加坡节点
       - 🇲🇾 马来西亚节点
       - 🇰🇷 韩国节点
-      - 🌍 其他节点
       - ♻️ 自动选择
       - DIRECT
-  # 其他游戏平台：默认跟随统一选择
-  - name: 🕹️ 游戏平台
+  # Epic Games：默认跟随统一选择
+  - name: 🎮 Epic Games
     type: select
     proxies:
       - 🔰 节点选择
@@ -148,7 +141,62 @@ proxy-groups+:
       - 🇸🇬 新加坡节点
       - 🇲🇾 马来西亚节点
       - 🇰🇷 韩国节点
-      - 🌍 其他节点
+      - ♻️ 自动选择
+      - DIRECT
+  # EA / Origin：默认跟随统一选择
+  - name: ⚡ EA / Origin
+    type: select
+    proxies:
+      - 🔰 节点选择
+      - 🇭🇰 香港节点
+      - 🇺🇸 美国节点
+      - 🇯🇵 日本节点
+      - 🇨🇳 台湾节点
+      - 🇸🇬 新加坡节点
+      - 🇲🇾 马来西亚节点
+      - 🇰🇷 韩国节点
+      - ♻️ 自动选择
+      - DIRECT
+  # Xbox：默认跟随统一选择
+  - name: 🟩 Xbox
+    type: select
+    proxies:
+      - 🔰 节点选择
+      - 🇭🇰 香港节点
+      - 🇺🇸 美国节点
+      - 🇯🇵 日本节点
+      - 🇨🇳 台湾节点
+      - 🇸🇬 新加坡节点
+      - 🇲🇾 马来西亚节点
+      - 🇰🇷 韩国节点
+      - ♻️ 自动选择
+      - DIRECT
+  # PlayStation：默认跟随统一选择
+  - name: 🎮 PlayStation
+    type: select
+    proxies:
+      - 🔰 节点选择
+      - 🇭🇰 香港节点
+      - 🇺🇸 美国节点
+      - 🇯🇵 日本节点
+      - 🇨🇳 台湾节点
+      - 🇸🇬 新加坡节点
+      - 🇲🇾 马来西亚节点
+      - 🇰🇷 韩国节点
+      - ♻️ 自动选择
+      - DIRECT
+  # Nintendo：默认跟随统一选择
+  - name: 🕹️ Nintendo
+    type: select
+    proxies:
+      - 🔰 节点选择
+      - 🇭🇰 香港节点
+      - 🇺🇸 美国节点
+      - 🇯🇵 日本节点
+      - 🇨🇳 台湾节点
+      - 🇸🇬 新加坡节点
+      - 🇲🇾 马来西亚节点
+      - 🇰🇷 韩国节点
       - ♻️ 自动选择
       - DIRECT
   # 地区组：没有匹配节点时显示 REJECT，避免无意直连
@@ -177,10 +225,6 @@ proxy-groups+:
     proxies:
       - REJECT
   - name: 🇰🇷 韩国节点
-    type: select
-    proxies:
-      - REJECT
-  - name: 🌍 其他节点
     type: select
     proxies:
       - REJECT
@@ -242,10 +286,11 @@ proxy-groups+:
   # Steam 商店 / 社区 / 创意工坊页面等：跟随统一选择
   - GEOSITE,steam,🎮 Steam
 
-  # 其他游戏平台
-  - GEOSITE,epicgames,🕹️ 游戏平台
-  - GEOSITE,origin,🕹️ 游戏平台
-  - GEOSITE,ea,🕹️ 游戏平台
-  - GEOSITE,sony,🕹️ 游戏平台
-  - GEOSITE,playstation,🕹️ 游戏平台
-  - GEOSITE,nintendo,🕹️ 游戏平台
+  # 按游戏平台分别选择节点
+  - GEOSITE,epicgames,🎮 Epic Games
+  - GEOSITE,origin,⚡ EA / Origin
+  - GEOSITE,ea,⚡ EA / Origin
+  - GEOSITE,xbox,🟩 Xbox
+  - GEOSITE,sony,🎮 PlayStation
+  - GEOSITE,playstation,🎮 PlayStation
+  - GEOSITE,nintendo,🕹️ Nintendo
