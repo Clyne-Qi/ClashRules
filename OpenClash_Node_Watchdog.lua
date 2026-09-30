@@ -10,7 +10,7 @@
 -- 5. 若整个地区都不可用或都 > 800ms，则保持当前选择，不跨地区切换。
 --
 -- 建议由 cron 每分钟调用一次：
--- * * * * * /usr/share/openclash/openclash_node_watchdog.lua >/dev/null 2>&1
+-- * * * * * /etc/openclash/openclash_node_watchdog.lua >/dev/null 2>&1
 
 local sys = require "luci.sys"
 local json = require "luci.jsonc"
