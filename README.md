@@ -8,6 +8,44 @@
 
 https://raw.githubusercontent.com/Clyne-Qi/ClashRules/main/ACL4SSR_Online_Full_%E8%B7%AF%E7%94%B1%E5%99%A8%E8%87%AA%E7%94%A8%E4%BF%AE%E6%94%B9%E7%89%88.yaml
 
+### 美国 / 香港节点守护器
+
+脚本：
+
+https://raw.githubusercontent.com/Clyne-Qi/ClashRules/main/OpenClash_Node_Watchdog.lua
+
+只监控 `🇺🇸 美国节点` 与 `🇭🇰 香港节点`。建议通过 cron 每分钟运行一次。
+
+当前逻辑：
+
+- 读取地区组当前手动选中的节点。
+- 连续测速 3 次，每次间隔 3 秒。
+- 只有 3 次全部高于 800ms 或测速失败，才触发该地区全量测速。
+- 全量测速后，仅在存在不高于 800ms 的节点时，切换到延迟最低者。
+- 如果整个地区都不可用或都高于 800ms，则保持原节点，不跨地区切换。
+
+安装示例：
+
+```sh
+wget -O /usr/share/openclash/openclash_node_watchdog.lua \
+  https://raw.githubusercontent.com/Clyne-Qi/ClashRules/main/OpenClash_Node_Watchdog.lua
+
+chmod +x /usr/share/openclash/openclash_node_watchdog.lua
+
+grep -q 'openclash_node_watchdog.lua' /etc/crontabs/root || \
+  echo '* * * * * /usr/share/openclash/openclash_node_watchdog.lua >/dev/null 2>&1' >> /etc/crontabs/root
+
+/etc/init.d/cron restart
+```
+
+脚本自动读取 OpenClash 的 Dashboard 端口（`cn_port`）和密钥（`dashboard_password`），通过本机 Mihomo REST API 测速和切换，不需要额外在脚本内填写密码。
+
+查看切换记录：
+
+```sh
+logread | grep openclash-watchdog
+```
+
 ## Android 端（FlClash / Mihomo）
 
 JavaScript 覆写：
