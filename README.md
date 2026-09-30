@@ -27,13 +27,13 @@ https://raw.githubusercontent.com/Clyne-Qi/ClashRules/main/OpenClash_Node_Watchd
 安装示例：
 
 ```sh
-wget -O /usr/share/openclash/openclash_node_watchdog.lua \
+wget -O /etc/openclash/openclash_node_watchdog.lua \
   https://raw.githubusercontent.com/Clyne-Qi/ClashRules/main/OpenClash_Node_Watchdog.lua
 
-chmod +x /usr/share/openclash/openclash_node_watchdog.lua
+chmod +x /etc/openclash/openclash_node_watchdog.lua
 
 grep -q 'openclash_node_watchdog.lua' /etc/crontabs/root || \
-  echo '* * * * * /usr/share/openclash/openclash_node_watchdog.lua >/dev/null 2>&1' >> /etc/crontabs/root
+  echo '* * * * * /etc/openclash/openclash_node_watchdog.lua >/dev/null 2>&1' >> /etc/crontabs/root
 
 /etc/init.d/cron restart
 ```
