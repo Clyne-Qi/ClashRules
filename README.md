@@ -24,7 +24,7 @@ JavaScript 覆写：
 
 https://raw.githubusercontent.com/Clyne-Qi/ClashRules/main/ClashParty_PC_Override.js
 
-PC 端当前仍为旧版分流逻辑，后续将按新版路由器端规则更新；目前额外包含 PS Remote Play 的 `RemotePlay.exe` 强制直连。
+PC 端已同步当前路由器端分流逻辑：动态生成地区节点组，统一使用 OpenAI、Google、YouTube、GitHub、Pixiv、Steam 与各游戏平台的独立策略组；并额外将 PS Remote Play 的 `RemotePlay.exe` 强制直连。
 
 ## 旧版完整配置
 
