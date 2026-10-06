@@ -32,7 +32,7 @@ ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🐟 漏网之�
 # 4. 新增分流组默认跟随“🔰 节点选择”；该组可选择地区，也可直接选择其他地区的具体节点。
 # 5. Steam 单独分组：国内下载/CDN 直连，商店/社区/创意工坊页面跟随统一选择。
 # 6. Pixiv 单独分组：pixiv.net / pximg.net / fanbox.cc 跟随统一选择。
-# 7. PS5（192.168.6.250）：TCP / UDP 全部直连，用于排查代理分流对连接质量的影响。
+# 7. PS5（192.168.6.250）：游戏下载/系统更新直连；其余流量（商店、登录、联机等）走“🎮 PlayStation”策略组。
 # ============================================================
 
 # 家中访问 clyne.top:5001 时直连 NAS，避开公网地址回流。
@@ -234,9 +234,15 @@ proxy-groups+:
   # 家中访问自建域名时走内网 NAS
   - DOMAIN,clyne.top,DIRECT
 
-  # PS5（192.168.6.250）全部直连
-  - AND,((SRC-IP-CIDR,192.168.6.250/32),(NETWORK,UDP)),DIRECT
-  - AND,((SRC-IP-CIDR,192.168.6.250/32),(NETWORK,TCP)),DIRECT
+  # PS5（192.168.6.250）分流：
+  # 1. 家庭局域网通信保持直连。
+  # 2. 游戏/补丁下载与系统更新 CDN 直连，避免代理拖慢大流量下载。
+  # 3. 其余 PS5 TCP / UDP 流量交给“🎮 PlayStation”，覆盖商店、登录、联机等。
+  - AND,((SRC-IP-CIDR,192.168.6.250/32),(DST-IP-CIDR,192.168.6.0/24)),DIRECT
+  - DOMAIN-SUFFIX,dl.playstation.net,DIRECT
+  - DOMAIN-SUFFIX,update.playstation.net,DIRECT
+  - AND,((SRC-IP-CIDR,192.168.6.250/32),(NETWORK,UDP)),🎮 PlayStation
+  - AND,((SRC-IP-CIDR,192.168.6.250/32),(NETWORK,TCP)),🎮 PlayStation
 
   # OpenAI / ChatGPT
   - DOMAIN-SUFFIX,chatgpt.com,💬 OpenAI
