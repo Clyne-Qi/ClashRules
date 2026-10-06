@@ -238,7 +238,7 @@ proxy-groups+:
   # 1. 家庭局域网通信保持直连。
   # 2. 游戏/补丁下载与系统更新 CDN 直连，避免代理拖慢大流量下载。
   # 3. 其余 PS5 TCP / UDP 流量交给“🎮 PlayStation”，覆盖商店、登录、联机等。
-  - AND,((SRC-IP-CIDR,192.168.6.250/32),(DST-IP-CIDR,192.168.6.0/24)),DIRECT
+  - AND,((SRC-IP-CIDR,192.168.6.250/32),(IP-CIDR,192.168.6.0/24)),DIRECT
   - DOMAIN-SUFFIX,dl.playstation.net,DIRECT
   - DOMAIN-SUFFIX,update.playstation.net,DIRECT
   - AND,((SRC-IP-CIDR,192.168.6.250/32),(NETWORK,UDP)),🎮 PlayStation
