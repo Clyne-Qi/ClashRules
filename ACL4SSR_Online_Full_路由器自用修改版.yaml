@@ -19,9 +19,10 @@ ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🍎 苹果服�
 ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🎯 全球直连'}['proxies']" "['DIRECT','🔰 节点选择','🇭🇰 香港节点','🇺🇸 美国节点','🇯🇵 日本节点','🇨🇳 台湾节点','🇸🇬 新加坡节点','🇲🇾 马来西亚节点','🇰🇷 韩国节点']"
 ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🛑 全球拦截'}['proxies']" "['🔰 节点选择','REJECT','DIRECT','🇭🇰 香港节点','🇺🇸 美国节点','🇯🇵 日本节点','🇨🇳 台湾节点','🇸🇬 新加坡节点','🇲🇾 马来西亚节点','🇰🇷 韩国节点']"
 ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🐟 漏网之鱼'}['proxies']" "['🔰 节点选择','🇭🇰 香港节点','🇺🇸 美国节点','🇯🇵 日本节点','🇨🇳 台湾节点','🇸🇬 新加坡节点','🇲🇾 马来西亚节点','🇰🇷 韩国节点','♻️ 自动选择','🎯 全球直连']"
-# 机场新增“🤖 AI 服务”统一收紧到官方支持更稳的地区；香港可用的 AI 由前置规则分流到“🌐 AI 宽松”。
-ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🤖 AI 服务'}['proxies']" "['🇺🇸 美国节点','🇯🇵 日本节点','🇸🇬 新加坡节点','🇨🇳 台湾节点','🇰🇷 韩国节点']"
 
+# 机场新增“🤖 AI 服务”：限制为官方支持更稳的地区，第一项默认美国。
+# 已确认香港可用的 AI 会由前置规则分流到“🌐 AI 宽松”。
+ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🤖 AI 服务'}['proxies']" "['🇺🇸 美国节点','🇯🇵 日本节点','🇸🇬 新加坡节点','🇨🇳 台湾节点','🇰🇷 韩国节点']"
 [YAML]
 
 # ============================================================
@@ -29,13 +30,16 @@ ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🤖 AI 服务'}
 #
 # 设计：
 # 1. 保留机场订阅原有节点、策略组与 rules。
-# 2. 新增个人分流策略组并前置对应规则；订阅原有分流组由上方 [Overwrite] 改为地区组选择。
-# 3. 地区组和总选择中的其他地区节点由上方 [Overwrite] 从机场真实 proxies 动态生成。
-# 4. 新增分流组默认跟随“🔰 节点选择”；该组可选择地区，也可直接选择其他地区的具体节点。
-# 5. AI 分三层：OpenAI 独立保障；严格 AI 使用受支持地区；已确认香港可用的服务走“🌐 AI 宽松”。
-# 6. 游戏平台统一并入“🎮 游戏服务”，默认香港；Steam/PS5 下载规则前置直连。
-# 7. Pixiv 单独分组：pixiv.net / pximg.net / fanbox.cc 跟随统一选择。
-# 8. PS5（192.168.6.250）：游戏下载/系统更新直连；其余流量（商店、登录、联机等）走“🎮 游戏服务”。
+# 2. 地区组和总选择由 [Overwrite] 从机场真实 proxies 动态生成。
+# 3. AI 分三层：
+#    - 💬 OpenAI：单独保障，默认美国；
+#    - 🤖 AI 服务：严格 AI，默认美国，不提供香港；
+#    - 🌐 AI 宽松：已确认香港可用的 AI，默认香港。
+# 4. 普通 Google / YouTube / GitHub / Pixiv 继续独立分流。
+# 5. Steam / Epic / EA / Xbox / PlayStation / Nintendo 合并为“🎮 游戏服务”，默认香港。
+# 6. Steam 国内下载/CDN 直连；PS5（192.168.6.250）游戏下载/系统更新直连，
+#    其余 PS5 TCP / UDP 流量走“🎮 游戏服务”。
+# 7. 外网 Dashboard CORS 使用通配 Origin；实际安全仍依赖 Controller secret 等鉴权。
 # ============================================================
 
 # 家中访问 clyne.top:5001 时直连 NAS，避开公网地址回流。
@@ -46,8 +50,7 @@ dns:
   fake-ip-filter+:
     - clyne.top
 
-# 允许外网通过动态公网 IP 打开的 Dashboard 调用 Mihomo Controller。
-# CORS 不是鉴权机制，实际访问安全仍由 Dashboard / Controller secret 等负责。
+# 允许动态公网 IP 打开的 Dashboard 调用 Mihomo Controller。
 external-controller-cors:
   allow-origins:
     - "*"
@@ -55,7 +58,144 @@ external-controller-cors:
 
 proxy-groups+:
 
-  # OpenAI / ChatGPT：独立保障
+  # OpenAI / ChatGPT：独立保障；第一项即默认美国。
+  - name: 💬 OpenAI
+    type: select
+    proxies:
+      - 🇺🇸 美国节点
+      - 🇯🇵 日本节点
+      - 🇸🇬 新加坡节点
+      - 🇨🇳 台湾节点
+      - 🇰🇷 韩国节点
+
+  # 已确认香港可用的 AI：Gemini 网页版 / Grok / Poe。
+  - name: 🌐 AI 宽松
+    type: select
+    proxies:
+      - 🇭🇰 香港节点
+      - 🇺🇸 美国节点
+      - 🇯🇵 日本节点
+      - 🇸🇬 新加坡节点
+      - 🇨🇳 台湾节点
+      - 🇰🇷 韩国节点
+
+  # 普通 Google：Google AI 域名会在 rules 中提前分流。
+  - name: 🔎 Google
+    type: select
+    proxies:
+      - 🔰 节点选择
+      - 🇭🇰 香港节点
+      - 🇺🇸 美国节点
+      - 🇯🇵 日本节点
+      - 🇨🇳 台湾节点
+      - 🇸🇬 新加坡节点
+      - 🇲🇾 马来西亚节点
+      - 🇰🇷 韩国节点
+      - ♻️ 自动选择
+      - DIRECT
+
+  - name: 📹 油管视频
+    type: select
+    proxies:
+      - 🔰 节点选择
+      - 🇭🇰 香港节点
+      - 🇺🇸 美国节点
+      - 🇯🇵 日本节点
+      - 🇨🇳 台湾节点
+      - 🇸🇬 新加坡节点
+      - 🇲🇾 马来西亚节点
+      - 🇰🇷 韩国节点
+      - ♻️ 自动选择
+      - DIRECT
+
+  - name: 💻 GitHub
+    type: select
+    proxies:
+      - 🔰 节点选择
+      - 🇭🇰 香港节点
+      - 🇺🇸 美国节点
+      - 🇯🇵 日本节点
+      - 🇨🇳 台湾节点
+      - 🇸🇬 新加坡节点
+      - 🇲🇾 马来西亚节点
+      - 🇰🇷 韩国节点
+      - ♻️ 自动选择
+      - DIRECT
+
+  - name: 🎨 Pixiv
+    type: select
+    proxies:
+      - 🔰 节点选择
+      - 🇭🇰 香港节点
+      - 🇺🇸 美国节点
+      - 🇯🇵 日本节点
+      - 🇨🇳 台湾节点
+      - 🇸🇬 新加坡节点
+      - 🇲🇾 马来西亚节点
+      - 🇰🇷 韩国节点
+      - ♻️ 自动选择
+      - DIRECT
+
+  # 所有游戏平台统一，第一项即默认香港。
+  - name: 🎮 游戏服务
+    type: select
+    proxies:
+      - 🇭🇰 香港节点
+      - 🇯🇵 日本节点
+      - 🇺🇸 美国节点
+      - 🇨🇳 台湾节点
+      - 🇸🇬 新加坡节点
+      - 🇲🇾 马来西亚节点
+      - 🇰🇷 韩国节点
+      - 🔰 节点选择
+      - ♻️ 自动选择
+      - DIRECT
+
+  # 地区组：具体节点由 [Overwrite] 动态填充。
+  - name: 🇭🇰 香港节点
+    type: select
+    proxies:
+      - REJECT
+  - name: 🇺🇸 美国节点
+    type: select
+    proxies:
+      - REJECT
+  - name: 🇯🇵 日本节点
+    type: select
+    proxies:
+      - REJECT
+  - name: 🇨🇳 台湾节点
+    type: select
+    proxies:
+      - REJECT
+  - name: 🇸🇬 新加坡节点
+    type: select
+    proxies:
+      - REJECT
+  - name: 🇲🇾 马来西亚节点
+    type: select
+    proxies:
+      - REJECT
+  - name: 🇰🇷 韩国节点
+    type: select
+    proxies:
+      - REJECT
+
+# 前置规则：优先于机场订阅原有 rules。
++rules:
+
+  # 家中访问自建域名时走内网 NAS。
+  - DOMAIN,clyne.top,DIRECT
+
+  # PS5（192.168.6.250）：
+  # 家庭局域网直连；游戏下载/系统更新直连；其余商店/登录/联机等走游戏组。
+  - AND,((SRC-IP-CIDR,192.168.6.250/32),(IP-CIDR,192.168.6.0/24)),DIRECT
+  - DOMAIN-SUFFIX,dl.playstation.net,DIRECT
+  - DOMAIN-SUFFIX,update.playstation.net,DIRECT
+  - AND,((SRC-IP-CIDR,192.168.6.250/32),(NETWORK,UDP)),🎮 游戏服务
+  - AND,((SRC-IP-CIDR,192.168.6.250/32),(NETWORK,TCP)),🎮 游戏服务
+
+  # OpenAI / ChatGPT：单独保障。
   - DOMAIN-SUFFIX,openai.com,💬 OpenAI
   - DOMAIN-SUFFIX,chatgpt.com,💬 OpenAI
   - DOMAIN-SUFFIX,chat.com,💬 OpenAI
@@ -64,7 +204,7 @@ proxy-groups+:
   - DOMAIN-SUFFIX,sora.com,💬 OpenAI
   - GEOSITE,openai,💬 OpenAI
 
-  # 香港可用的 AI：必须放在严格 AI / Google 总规则之前
+  # 香港可用 AI：必须放在严格 AI / Google 总规则之前。
   - DOMAIN-SUFFIX,gemini.google.com,🌐 AI 宽松
   - DOMAIN-SUFFIX,bard.google.com,🌐 AI 宽松
   - DOMAIN-SUFFIX,x.ai,🌐 AI 宽松
@@ -72,7 +212,7 @@ proxy-groups+:
   - DOMAIN-SUFFIX,poe.com,🌐 AI 宽松
   - DOMAIN-SUFFIX,poecdn.net,🌐 AI 宽松
 
-  # 严格 AI：香港不稳定/不受支持或尚未确认，统一走“🤖 AI 服务”
+  # 严格 AI：香港不支持/不稳定，或尚未确认香港支持。
   - DOMAIN-SUFFIX,anthropic.com,🤖 AI 服务
   - DOMAIN-SUFFIX,claude.ai,🤖 AI 服务
   - DOMAIN-SUFFIX,claude.com,🤖 AI 服务
@@ -104,19 +244,19 @@ proxy-groups+:
   - DOMAIN-SUFFIX,suno.com,🤖 AI 服务
   - DOMAIN-SUFFIX,suno.ai,🤖 AI 服务
 
-  # YouTube 必须放在 Google 前面
+  # YouTube 必须放在 Google 前面。
   - GEOSITE,youtube,📹 油管视频
 
-  # 普通 Google（Google AI 已在上面提前分流）
+  # 普通 Google（Google AI 已在上面提前分流）。
   - GEOSITE,google,🔎 Google
 
-  # GitHub
+  # GitHub。
   - DOMAIN-SUFFIX,github.com,💻 GitHub
   - DOMAIN-SUFFIX,githubusercontent.com,💻 GitHub
   - DOMAIN-SUFFIX,githubassets.com,💻 GitHub
   - GEOSITE,github,💻 GitHub
 
-  # Pixiv / FANBOX
+  # Pixiv / FANBOX。
   - DOMAIN-SUFFIX,pixiv.net,🎨 Pixiv
   - DOMAIN-SUFFIX,pximg.net,🎨 Pixiv
   - DOMAIN-SUFFIX,fanbox.cc,🎨 Pixiv
@@ -140,7 +280,7 @@ proxy-groups+:
   - DOMAIN-SUFFIX,steamcontent.com,DIRECT
   - DOMAIN-SUFFIX,steamusercontent.com,DIRECT
 
-  # 所有游戏平台统一走“🎮 游戏服务”
+  # 所有游戏平台统一走游戏组。
   - GEOSITE,steam,🎮 游戏服务
   - GEOSITE,epicgames,🎮 游戏服务
   - GEOSITE,origin,🎮 游戏服务
