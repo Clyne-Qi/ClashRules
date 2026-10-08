@@ -43,6 +43,13 @@ dns:
   fake-ip-filter+:
     - clyne.top
 
+# 允许外网通过动态公网 IP 打开的 Dashboard 调用 Mihomo Controller。
+# CORS 不是鉴权机制，实际访问安全仍由 Dashboard / Controller secret 等负责。
+external-controller-cors:
+  allow-origins:
+    - "*"
+  allow-private-network: true
+
 proxy-groups+:
 
   # OpenAI / ChatGPT：默认跟随统一选择
