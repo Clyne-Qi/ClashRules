@@ -19,6 +19,8 @@ ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🍎 苹果服�
 ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🎯 全球直连'}['proxies']" "['DIRECT','🔰 节点选择','🇭🇰 香港节点','🇺🇸 美国节点','🇯🇵 日本节点','🇨🇳 台湾节点','🇸🇬 新加坡节点','🇲🇾 马来西亚节点','🇰🇷 韩国节点']"
 ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🛑 全球拦截'}['proxies']" "['🔰 节点选择','REJECT','DIRECT','🇭🇰 香港节点','🇺🇸 美国节点','🇯🇵 日本节点','🇨🇳 台湾节点','🇸🇬 新加坡节点','🇲🇾 马来西亚节点','🇰🇷 韩国节点']"
 ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🐟 漏网之鱼'}['proxies']" "['🔰 节点选择','🇭🇰 香港节点','🇺🇸 美国节点','🇯🇵 日本节点','🇨🇳 台湾节点','🇸🇬 新加坡节点','🇲🇾 马来西亚节点','🇰🇷 韩国节点','♻️ 自动选择','🎯 全球直连']"
+# 机场新增“🤖 AI 服务”统一收紧到官方支持更稳的地区；香港可用的 AI 由前置规则分流到“🌐 AI 宽松”。
+ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🤖 AI 服务'}['proxies']" "['🇺🇸 美国节点','🇯🇵 日本节点','🇸🇬 新加坡节点','🇨🇳 台湾节点','🇰🇷 韩国节点']"
 
 [YAML]
 
@@ -30,9 +32,10 @@ ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🐟 漏网之�
 # 2. 新增个人分流策略组并前置对应规则；订阅原有分流组由上方 [Overwrite] 改为地区组选择。
 # 3. 地区组和总选择中的其他地区节点由上方 [Overwrite] 从机场真实 proxies 动态生成。
 # 4. 新增分流组默认跟随“🔰 节点选择”；该组可选择地区，也可直接选择其他地区的具体节点。
-# 5. Steam 单独分组：国内下载/CDN 直连，商店/社区/创意工坊页面跟随统一选择。
-# 6. Pixiv 单独分组：pixiv.net / pximg.net / fanbox.cc 跟随统一选择。
-# 7. PS5（192.168.6.250）：游戏下载/系统更新直连；其余流量（商店、登录、联机等）走“🎮 PlayStation”策略组。
+# 5. AI 分三层：OpenAI 独立保障；严格 AI 使用受支持地区；已确认香港可用的服务走“🌐 AI 宽松”。
+# 6. 游戏平台统一并入“🎮 游戏服务”，默认香港；Steam/PS5 下载规则前置直连。
+# 7. Pixiv 单独分组：pixiv.net / pximg.net / fanbox.cc 跟随统一选择。
+# 8. PS5（192.168.6.250）：游戏下载/系统更新直连；其余流量（商店、登录、联机等）走“🎮 游戏服务”。
 # ============================================================
 
 # 家中访问 clyne.top:5001 时直连 NAS，避开公网地址回流。
@@ -52,233 +55,74 @@ external-controller-cors:
 
 proxy-groups+:
 
-  # OpenAI / ChatGPT：默认跟随统一选择
-  - name: 💬 OpenAI
-    type: select
-    proxies:
-      - 🔰 节点选择
-      - 🇭🇰 香港节点
-      - 🇺🇸 美国节点
-      - 🇯🇵 日本节点
-      - 🇨🇳 台湾节点
-      - 🇸🇬 新加坡节点
-      - 🇲🇾 马来西亚节点
-      - 🇰🇷 韩国节点
-      - ♻️ 自动选择
-      - DIRECT
-  # Google：默认跟随统一选择
-  - name: 🔎 Google
-    type: select
-    proxies:
-      - 🔰 节点选择
-      - 🇭🇰 香港节点
-      - 🇺🇸 美国节点
-      - 🇯🇵 日本节点
-      - 🇨🇳 台湾节点
-      - 🇸🇬 新加坡节点
-      - 🇲🇾 马来西亚节点
-      - 🇰🇷 韩国节点
-      - ♻️ 自动选择
-      - DIRECT
-  # 📹 油管视频：默认跟随统一选择
-  - name: 📹 油管视频
-    type: select
-    proxies:
-      - 🔰 节点选择
-      - 🇭🇰 香港节点
-      - 🇺🇸 美国节点
-      - 🇯🇵 日本节点
-      - 🇨🇳 台湾节点
-      - 🇸🇬 新加坡节点
-      - 🇲🇾 马来西亚节点
-      - 🇰🇷 韩国节点
-      - ♻️ 自动选择
-      - DIRECT
-  # 💻 GitHub：默认跟随统一选择
-  - name: 💻 GitHub
-    type: select
-    proxies:
-      - 🔰 节点选择
-      - 🇭🇰 香港节点
-      - 🇺🇸 美国节点
-      - 🇯🇵 日本节点
-      - 🇨🇳 台湾节点
-      - 🇸🇬 新加坡节点
-      - 🇲🇾 马来西亚节点
-      - 🇰🇷 韩国节点
-      - ♻️ 自动选择
-      - DIRECT
-  # Pixiv：默认跟随统一选择
-  - name: 🎨 Pixiv
-    type: select
-    proxies:
-      - 🔰 节点选择
-      - 🇭🇰 香港节点
-      - 🇺🇸 美国节点
-      - 🇯🇵 日本节点
-      - 🇨🇳 台湾节点
-      - 🇸🇬 新加坡节点
-      - 🇲🇾 马来西亚节点
-      - 🇰🇷 韩国节点
-      - ♻️ 自动选择
-      - DIRECT
-  # Steam：默认跟随统一选择（仅商店/社区等非下载流量）
-  - name: 🎮 Steam
-    type: select
-    proxies:
-      - 🔰 节点选择
-      - 🇭🇰 香港节点
-      - 🇺🇸 美国节点
-      - 🇯🇵 日本节点
-      - 🇨🇳 台湾节点
-      - 🇸🇬 新加坡节点
-      - 🇲🇾 马来西亚节点
-      - 🇰🇷 韩国节点
-      - ♻️ 自动选择
-      - DIRECT
-  # Epic Games：默认跟随统一选择
-  - name: 🎮 Epic Games
-    type: select
-    proxies:
-      - 🔰 节点选择
-      - 🇭🇰 香港节点
-      - 🇺🇸 美国节点
-      - 🇯🇵 日本节点
-      - 🇨🇳 台湾节点
-      - 🇸🇬 新加坡节点
-      - 🇲🇾 马来西亚节点
-      - 🇰🇷 韩国节点
-      - ♻️ 自动选择
-      - DIRECT
-  # EA / Origin：默认跟随统一选择
-  - name: ⚡ EA / Origin
-    type: select
-    proxies:
-      - 🔰 节点选择
-      - 🇭🇰 香港节点
-      - 🇺🇸 美国节点
-      - 🇯🇵 日本节点
-      - 🇨🇳 台湾节点
-      - 🇸🇬 新加坡节点
-      - 🇲🇾 马来西亚节点
-      - 🇰🇷 韩国节点
-      - ♻️ 自动选择
-      - DIRECT
-  # Xbox：默认跟随统一选择
-  - name: 🟩 Xbox
-    type: select
-    proxies:
-      - 🔰 节点选择
-      - 🇭🇰 香港节点
-      - 🇺🇸 美国节点
-      - 🇯🇵 日本节点
-      - 🇨🇳 台湾节点
-      - 🇸🇬 新加坡节点
-      - 🇲🇾 马来西亚节点
-      - 🇰🇷 韩国节点
-      - ♻️ 自动选择
-      - DIRECT
-  # PlayStation：默认跟随统一选择
-  - name: 🎮 PlayStation
-    type: select
-    proxies:
-      - 🔰 节点选择
-      - 🇭🇰 香港节点
-      - 🇺🇸 美国节点
-      - 🇯🇵 日本节点
-      - 🇨🇳 台湾节点
-      - 🇸🇬 新加坡节点
-      - 🇲🇾 马来西亚节点
-      - 🇰🇷 韩国节点
-      - ♻️ 自动选择
-      - DIRECT
-  # Nintendo：默认跟随统一选择
-  - name: 🕹️ Nintendo
-    type: select
-    proxies:
-      - 🔰 节点选择
-      - 🇭🇰 香港节点
-      - 🇺🇸 美国节点
-      - 🇯🇵 日本节点
-      - 🇨🇳 台湾节点
-      - 🇸🇬 新加坡节点
-      - 🇲🇾 马来西亚节点
-      - 🇰🇷 韩国节点
-      - ♻️ 自动选择
-      - DIRECT
-  # 地区组：没有匹配节点时显示 REJECT，避免无意直连
-  - name: 🇭🇰 香港节点
-    type: select
-    proxies:
-      - REJECT
-  - name: 🇺🇸 美国节点
-    type: select
-    proxies:
-      - REJECT
-  - name: 🇯🇵 日本节点
-    type: select
-    proxies:
-      - REJECT
-  - name: 🇨🇳 台湾节点
-    type: select
-    proxies:
-      - REJECT
-  - name: 🇸🇬 新加坡节点
-    type: select
-    proxies:
-      - REJECT
-  - name: 🇲🇾 马来西亚节点
-    type: select
-    proxies:
-      - REJECT
-  - name: 🇰🇷 韩国节点
-    type: select
-    proxies:
-      - REJECT
-# 前置规则：优先于机场订阅原有 rules
-+rules:
-
-  # 家中访问自建域名时走内网 NAS
-  - DOMAIN,clyne.top,DIRECT
-
-  # PS5（192.168.6.250）分流：
-  # 1. 家庭局域网通信保持直连。
-  # 2. 游戏/补丁下载与系统更新 CDN 直连，避免代理拖慢大流量下载。
-  # 3. 其余 PS5 TCP / UDP 流量交给“🎮 PlayStation”，覆盖商店、登录、联机等。
-  - AND,((SRC-IP-CIDR,192.168.6.250/32),(IP-CIDR,192.168.6.0/24)),DIRECT
-  - DOMAIN-SUFFIX,dl.playstation.net,DIRECT
-  - DOMAIN-SUFFIX,update.playstation.net,DIRECT
-  - AND,((SRC-IP-CIDR,192.168.6.250/32),(NETWORK,UDP)),🎮 PlayStation
-  - AND,((SRC-IP-CIDR,192.168.6.250/32),(NETWORK,TCP)),🎮 PlayStation
-
-  # OpenAI / ChatGPT
-  - DOMAIN-SUFFIX,chatgpt.com,💬 OpenAI
+  # OpenAI / ChatGPT：独立保障
   - DOMAIN-SUFFIX,openai.com,💬 OpenAI
+  - DOMAIN-SUFFIX,chatgpt.com,💬 OpenAI
+  - DOMAIN-SUFFIX,chat.com,💬 OpenAI
   - DOMAIN-SUFFIX,oaistatic.com,💬 OpenAI
   - DOMAIN-SUFFIX,oaiusercontent.com,💬 OpenAI
+  - DOMAIN-SUFFIX,sora.com,💬 OpenAI
   - GEOSITE,openai,💬 OpenAI
 
-  # 📹 油管视频 放在 Google 前面
+  # 香港可用的 AI：必须放在严格 AI / Google 总规则之前
+  - DOMAIN-SUFFIX,gemini.google.com,🌐 AI 宽松
+  - DOMAIN-SUFFIX,bard.google.com,🌐 AI 宽松
+  - DOMAIN-SUFFIX,x.ai,🌐 AI 宽松
+  - DOMAIN-SUFFIX,grok.com,🌐 AI 宽松
+  - DOMAIN-SUFFIX,poe.com,🌐 AI 宽松
+  - DOMAIN-SUFFIX,poecdn.net,🌐 AI 宽松
+
+  # 严格 AI：香港不稳定/不受支持或尚未确认，统一走“🤖 AI 服务”
+  - DOMAIN-SUFFIX,anthropic.com,🤖 AI 服务
+  - DOMAIN-SUFFIX,claude.ai,🤖 AI 服务
+  - DOMAIN-SUFFIX,claude.com,🤖 AI 服务
+  - DOMAIN-SUFFIX,claudeusercontent.com,🤖 AI 服务
+  - DOMAIN-SUFFIX,clau.de,🤖 AI 服务
+  - DOMAIN-SUFFIX,aistudio.google.com,🤖 AI 服务
+  - DOMAIN-SUFFIX,makersuite.google.com,🤖 AI 服务
+  - DOMAIN-SUFFIX,notebooklm.google.com,🤖 AI 服务
+  - DOMAIN-SUFFIX,notebooklm.google,🤖 AI 服务
+  - DOMAIN-SUFFIX,generativelanguage.googleapis.com,🤖 AI 服务
+  - DOMAIN-SUFFIX,alkalimakersuite-pa.clients6.google.com,🤖 AI 服务
+  - DOMAIN-SUFFIX,proactivebackend-pa.googleapis.com,🤖 AI 服务
+  - DOMAIN-SUFFIX,ai.google.dev,🤖 AI 服务
+  - DOMAIN-SUFFIX,deepmind.com,🤖 AI 服务
+  - DOMAIN-SUFFIX,deepmind.google,🤖 AI 服务
+  - DOMAIN-SUFFIX,perplexity.ai,🤖 AI 服务
+  - DOMAIN-SUFFIX,pplx.ai,🤖 AI 服务
+  - DOMAIN-SUFFIX,cursor.com,🤖 AI 服务
+  - DOMAIN-SUFFIX,cursor.sh,🤖 AI 服务
+  - DOMAIN-SUFFIX,cursorapi.com,🤖 AI 服务
+  - DOMAIN-SUFFIX,githubcopilot.com,🤖 AI 服务
+  - DOMAIN-SUFFIX,copilot.microsoft.com,🤖 AI 服务
+  - DOMAIN-SUFFIX,character.ai,🤖 AI 服务
+  - DOMAIN-SUFFIX,midjourney.com,🤖 AI 服务
+  - DOMAIN-SUFFIX,huggingface.co,🤖 AI 服务
+  - DOMAIN-SUFFIX,mistral.ai,🤖 AI 服务
+  - DOMAIN-SUFFIX,openrouter.ai,🤖 AI 服务
+  - DOMAIN-SUFFIX,elevenlabs.io,🤖 AI 服务
+  - DOMAIN-SUFFIX,suno.com,🤖 AI 服务
+  - DOMAIN-SUFFIX,suno.ai,🤖 AI 服务
+
+  # YouTube 必须放在 Google 前面
   - GEOSITE,youtube,📹 油管视频
 
-  # Google
+  # 普通 Google（Google AI 已在上面提前分流）
   - GEOSITE,google,🔎 Google
 
-  # 💻 GitHub
+  # GitHub
   - DOMAIN-SUFFIX,github.com,💻 GitHub
   - DOMAIN-SUFFIX,githubusercontent.com,💻 GitHub
   - DOMAIN-SUFFIX,githubassets.com,💻 GitHub
   - GEOSITE,github,💻 GitHub
 
-  # Pixiv / FANBOX：跟随统一选择
-  # 参考 ACL4SSR Pixiv.list：pixiv.net / pximg.net / fanbox.cc
+  # Pixiv / FANBOX
   - DOMAIN-SUFFIX,pixiv.net,🎨 Pixiv
   - DOMAIN-SUFFIX,pximg.net,🎨 Pixiv
   - DOMAIN-SUFFIX,fanbox.cc,🎨 Pixiv
   - DOMAIN-SUFFIX,ads-pixiv.net,🎨 Pixiv
 
-  # Steam 国内下载/CDN：直连
-  # 参考 ACL4SSR 的 SteamCN 规则，必须放在 Steam 总规则之前。
+  # Steam 国内下载 / CDN：直连，必须放在 Steam 总规则之前。
   - DOMAIN,csgo.wmsj.cn,DIRECT
   - DOMAIN,dl.steam.clngaa.com,DIRECT
   - DOMAIN,dl.steam.ksyna.com,DIRECT
@@ -296,14 +140,12 @@ proxy-groups+:
   - DOMAIN-SUFFIX,steamcontent.com,DIRECT
   - DOMAIN-SUFFIX,steamusercontent.com,DIRECT
 
-  # Steam 商店 / 社区 / 创意工坊页面等：跟随统一选择
-  - GEOSITE,steam,🎮 Steam
-
-  # 按游戏平台分别选择节点
-  - GEOSITE,epicgames,🎮 Epic Games
-  - GEOSITE,origin,⚡ EA / Origin
-  - GEOSITE,ea,⚡ EA / Origin
-  - GEOSITE,xbox,🟩 Xbox
-  - GEOSITE,sony,🎮 PlayStation
-  - GEOSITE,playstation,🎮 PlayStation
-  - GEOSITE,nintendo,🕹️ Nintendo
+  # 所有游戏平台统一走“🎮 游戏服务”
+  - GEOSITE,steam,🎮 游戏服务
+  - GEOSITE,epicgames,🎮 游戏服务
+  - GEOSITE,origin,🎮 游戏服务
+  - GEOSITE,ea,🎮 游戏服务
+  - GEOSITE,xbox,🎮 游戏服务
+  - GEOSITE,sony,🎮 游戏服务
+  - GEOSITE,playstation,🎮 游戏服务
+  - GEOSITE,nintendo,🎮 游戏服务
