@@ -122,7 +122,7 @@ function main(config) {
   setGroupChoices('📲 电报信息', [mainGroupName].concat(REGION_NAMES).concat([autoGroupName, existing('🎯 全球直连')]));
   setGroupChoices('🍎 苹果服务', [mainGroupName].concat(REGION_NAMES).concat([autoGroupName, existing('🎯 全球直连')]));
   setGroupChoices('🎯 全球直连', ['DIRECT', mainGroupName].concat(REGION_NAMES));
-  setGroupChoices('🛑 全球拦截', [mainGroupName, 'REJECT', 'DIRECT'].concat(REGION_NAMES));
+  setGroupChoices('🛑 全球拦截', ['REJECT', 'DIRECT', mainGroupName, autoGroupName].concat(REGION_NAMES));
   setGroupChoices('🐟 漏网之鱼', [mainGroupName].concat(REGION_NAMES).concat([autoGroupName, existing('🎯 全球直连')]));
 
   const strictAi = ['🇺🇸 美国节点','🇯🇵 日本节点','🇸🇬 新加坡节点','🇨🇳 台湾节点','🇰🇷 韩国节点'];
@@ -139,7 +139,24 @@ function main(config) {
   groups.push({ name:'🎨 Pixiv', type:'select', proxies:commonChoices.slice() });
   groups.push({ name:'🎮 游戏服务', type:'select', proxies:unique(gameChoices) });
 
-  config['proxy-groups'] = groups;
+  // 显示顺序：把所有地区组移动到“♻️ 自动选择”后面，方便直接测速/切换。
+  const regionalGroupSet = new Set(REGION_NAMES);
+  const movedRegionGroups = groups.filter(function (g) {
+    return g && regionalGroupSet.has(g.name);
+  });
+  const otherGroups = groups.filter(function (g) {
+    return !g || !regionalGroupSet.has(g.name);
+  });
+  const autoIndex = otherGroups.findIndex(function (g) {
+    return g && g.name === autoGroupName;
+  });
+  const orderedGroups = autoIndex >= 0
+    ? otherGroups.slice(0, autoIndex + 1)
+        .concat(movedRegionGroups)
+        .concat(otherGroups.slice(autoIndex + 1))
+    : otherGroups.concat(movedRegionGroups);
+
+  config['proxy-groups'] = orderedGroups;
 
   const prependRules = [
 
