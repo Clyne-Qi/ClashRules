@@ -1,22 +1,17 @@
 // Clash Party / Mihomo PC 端覆写
-// 基于 ACL4SSR_Online_Full_路由器自用修改版.yaml 的当前分流逻辑整理。
-// 保留机场订阅原有节点、策略组与 rules；动态生成地区组，并前置个人分流规则。
-// PC 专用差异：PS Remote Play（RemotePlay.exe）强制 DIRECT，避免 TUN/代理接管后远程游玩连接异常。
-// 不写死 clyne.top -> 192.168.6.100，避免在非家庭网络环境下受到影响。
+// 与路由器端当前逻辑同步：地区组、三层 AI 分流、统一游戏平台分流。
+// PC 专用：PS Remote Play（RemotePlay.exe）强制 DIRECT。
+// 不写死家庭内网 hosts，避免离开家庭网络后受影响。
 
 function main(config) {
   if (!config || typeof config !== 'object') return config;
 
   const rawProxies = Array.isArray(config.proxies) ? config.proxies : [];
   const proxyNames = rawProxies
-    .map(function (p) {
-      return p && typeof p === 'object' ? p.name : null;
-    })
+    .map(function (p) { return p && typeof p === 'object' ? p.name : null; })
     .filter(Boolean);
 
-  const oldGroups = Array.isArray(config['proxy-groups'])
-    ? config['proxy-groups']
-    : [];
+  const oldGroups = Array.isArray(config['proxy-groups']) ? config['proxy-groups'] : [];
 
   const REGION_NAMES = [
     '🇭🇰 香港节点',
@@ -28,18 +23,24 @@ function main(config) {
     '🇰🇷 韩国节点'
   ];
 
-  const BUSINESS_NAMES = [
-    '💬 OpenAI',
-    '🔎 Google',
-    '📹 油管视频',
-    '💻 GitHub',
-    '🎨 Pixiv',
+  const OLD_GAME_GROUPS = [
     '🎮 Steam',
     '🎮 Epic Games',
     '⚡ EA / Origin',
     '🟩 Xbox',
     '🎮 PlayStation',
     '🕹️ Nintendo'
+  ];
+
+  const CUSTOM_GROUPS = [
+    '💬 OpenAI',
+    '🤖 AI 服务',
+    '🌐 AI 宽松',
+    '🔎 Google',
+    '📹 油管视频',
+    '💻 GitHub',
+    '🎨 Pixiv',
+    '🎮 游戏服务'
   ];
 
   const regionPatterns = {
@@ -61,9 +62,7 @@ function main(config) {
   }
 
   function findGroup(groups, exactName, fallbackPattern) {
-    let group = groups.find(function (g) {
-      return g && g.name === exactName;
-    });
+    let group = groups.find(function (g) { return g && g.name === exactName; });
     if (!group && fallbackPattern) {
       group = groups.find(function (g) {
         return g && fallbackPattern.test(String(g.name || ''));
@@ -73,9 +72,7 @@ function main(config) {
   }
 
   function nodesForRegion(pattern) {
-    return proxyNames.filter(function (name) {
-      return pattern.test(name);
-    });
+    return proxyNames.filter(function (name) { return pattern.test(name); });
   }
 
   function isRegionNode(name) {
@@ -84,13 +81,10 @@ function main(config) {
     });
   }
 
-  const managedNames = new Set(REGION_NAMES.concat(BUSINESS_NAMES));
+  const managedNames = new Set(REGION_NAMES.concat(CUSTOM_GROUPS).concat(OLD_GAME_GROUPS));
 
-  // 保留机场原有组，仅移除旧的同名自定义组，避免重复。
   const groups = oldGroups
-    .filter(function (g) {
-      return !g || !managedNames.has(g.name);
-    })
+    .filter(function (g) { return !g || !managedNames.has(g.name); })
     .map(function (g) {
       if (!g || typeof g !== 'object') return g;
       const copy = Object.assign({}, g);
@@ -100,162 +94,118 @@ function main(config) {
 
   const mainGroup = findGroup(groups, '🔰 节点选择', /节点选择/);
   const mainGroupName = mainGroup ? mainGroup.name : null;
-
   const autoGroup = findGroup(groups, '♻️ 自动选择', /自动选择|auto/i);
   const autoGroupName = autoGroup ? autoGroup.name : null;
 
-  // 动态生成地区组。
   const regionGroups = REGION_NAMES.map(function (name) {
     const nodes = nodesForRegion(regionPatterns[name]);
-    return {
-      name: name,
-      type: 'select',
-      proxies: nodes.length ? nodes : ['REJECT']
-    };
+    return { name: name, type: 'select', proxies: nodes.length ? nodes : ['REJECT'] };
   });
-
   groups.push.apply(groups, regionGroups);
 
-  // “节点选择”：地区组 + 其他地区真实节点 + DIRECT。
   if (mainGroup) {
     const extraNodes = proxyNames.filter(function (name) {
       return !isRegionNode(name) && !subscriptionInfoPattern.test(name);
     });
-
-    mainGroup.proxies = unique(
-      [autoGroupName]
-        .concat(REGION_NAMES)
-        .concat(extraNodes)
-        .concat(['DIRECT'])
-    );
+    mainGroup.proxies = unique([autoGroupName].concat(REGION_NAMES).concat(extraNodes).concat(['DIRECT']));
   }
 
-  const groupNames = new Set(
-    groups
-      .filter(function (g) {
-        return g && g.name;
-      })
-      .map(function (g) {
-        return g.name;
-      })
-  );
-
-  function existing(name) {
-    return groupNames.has(name) ? name : null;
-  }
-
+  const groupNames = new Set(groups.filter(function (g) { return g && g.name; }).map(function (g) { return g.name; }));
+  function existing(name) { return groupNames.has(name) ? name : null; }
   function setGroupChoices(name, choices) {
-    const group = groups.find(function (g) {
-      return g && g.name === name;
-    });
-    if (!group) return;
-    group.proxies = unique(choices);
+    const group = groups.find(function (g) { return g && g.name === name; });
+    if (group) group.proxies = unique(choices);
   }
 
-  // 对齐路由器端原订阅策略组的可选项。
-  setGroupChoices(
-    '🌍 国外媒体',
-    [mainGroupName]
-      .concat(REGION_NAMES)
-      .concat([autoGroupName, existing('🎯 全球直连')])
-  );
+  setGroupChoices('🌍 国外媒体', [mainGroupName].concat(REGION_NAMES).concat([autoGroupName, existing('🎯 全球直连')]));
+  setGroupChoices('🌏 国内媒体', [existing('🎯 全球直连'), mainGroupName].concat(REGION_NAMES).concat([autoGroupName]));
+  setGroupChoices('Ⓜ️ 微软服务', [existing('🎯 全球直连'), mainGroupName].concat(REGION_NAMES).concat([autoGroupName]));
+  setGroupChoices('📲 电报信息', [mainGroupName].concat(REGION_NAMES).concat([autoGroupName, existing('🎯 全球直连')]));
+  setGroupChoices('🍎 苹果服务', [mainGroupName].concat(REGION_NAMES).concat([autoGroupName, existing('🎯 全球直连')]));
+  setGroupChoices('🎯 全球直连', ['DIRECT', mainGroupName].concat(REGION_NAMES));
+  setGroupChoices('🛑 全球拦截', [mainGroupName, 'REJECT', 'DIRECT'].concat(REGION_NAMES));
+  setGroupChoices('🐟 漏网之鱼', [mainGroupName].concat(REGION_NAMES).concat([autoGroupName, existing('🎯 全球直连')]));
 
-  setGroupChoices(
-    '🌏 国内媒体',
-    [existing('🎯 全球直连'), mainGroupName]
-      .concat(REGION_NAMES)
-      .concat([autoGroupName])
-  );
+  const strictAi = ['🇺🇸 美国节点','🇯🇵 日本节点','🇸🇬 新加坡节点','🇨🇳 台湾节点','🇰🇷 韩国节点'];
+  const relaxedAi = ['🇭🇰 香港节点'].concat(strictAi);
+  const commonChoices = unique([mainGroupName].concat(REGION_NAMES).concat([autoGroupName, 'DIRECT']));
+  const gameChoices = ['🇭🇰 香港节点','🇯🇵 日本节点','🇺🇸 美国节点','🇨🇳 台湾节点','🇸🇬 新加坡节点','🇲🇾 马来西亚节点','🇰🇷 韩国节点',mainGroupName,autoGroupName,'DIRECT'];
 
-  setGroupChoices(
-    'Ⓜ️ 微软服务',
-    [existing('🎯 全球直连'), mainGroupName]
-      .concat(REGION_NAMES)
-      .concat([autoGroupName])
-  );
-
-  setGroupChoices(
-    '📲 电报信息',
-    [mainGroupName]
-      .concat(REGION_NAMES)
-      .concat([autoGroupName, existing('🎯 全球直连')])
-  );
-
-  setGroupChoices(
-    '🍎 苹果服务',
-    [mainGroupName]
-      .concat(REGION_NAMES)
-      .concat([autoGroupName, existing('🎯 全球直连')])
-  );
-
-  setGroupChoices(
-    '🎯 全球直连',
-    ['DIRECT', mainGroupName].concat(REGION_NAMES)
-  );
-
-  setGroupChoices(
-    '🛑 全球拦截',
-    [mainGroupName, 'REJECT', 'DIRECT'].concat(REGION_NAMES)
-  );
-
-  setGroupChoices(
-    '🐟 漏网之鱼',
-    [mainGroupName]
-      .concat(REGION_NAMES)
-      .concat([autoGroupName, existing('🎯 全球直连')])
-  );
-
-  // 新增业务分流组；默认第一项跟随“节点选择”。
-  const commonChoices = unique(
-    [mainGroupName]
-      .concat(REGION_NAMES)
-      .concat([autoGroupName, 'DIRECT'])
-  );
-
-  BUSINESS_NAMES.forEach(function (name) {
-    groups.push({
-      name: name,
-      type: 'select',
-      proxies: commonChoices.slice()
-    });
-  });
+  groups.push({ name:'💬 OpenAI', type:'select', proxies:strictAi.slice() });
+  groups.push({ name:'🤖 AI 服务', type:'select', proxies:strictAi.slice() });
+  groups.push({ name:'🌐 AI 宽松', type:'select', proxies:relaxedAi.slice() });
+  groups.push({ name:'🔎 Google', type:'select', proxies:commonChoices.slice() });
+  groups.push({ name:'📹 油管视频', type:'select', proxies:commonChoices.slice() });
+  groups.push({ name:'💻 GitHub', type:'select', proxies:commonChoices.slice() });
+  groups.push({ name:'🎨 Pixiv', type:'select', proxies:commonChoices.slice() });
+  groups.push({ name:'🎮 游戏服务', type:'select', proxies:unique(gameChoices) });
 
   config['proxy-groups'] = groups;
 
-  // PROCESS-NAME 规则需要进程识别；strict 足够用于 Windows RemotePlay.exe。
   config['find-process-mode'] = 'strict';
 
-  // 前置规则：优先于机场订阅原有 rules。
   const prependRules = [
-    // PC 专用：PS Remote Play 全进程直连
     'PROCESS-NAME,RemotePlay.exe,DIRECT',
 
-    // OpenAI / ChatGPT
-    'DOMAIN-SUFFIX,chatgpt.com,💬 OpenAI',
     'DOMAIN-SUFFIX,openai.com,💬 OpenAI',
+    'DOMAIN-SUFFIX,chatgpt.com,💬 OpenAI',
+    'DOMAIN-SUFFIX,chat.com,💬 OpenAI',
     'DOMAIN-SUFFIX,oaistatic.com,💬 OpenAI',
     'DOMAIN-SUFFIX,oaiusercontent.com,💬 OpenAI',
+    'DOMAIN-SUFFIX,sora.com,💬 OpenAI',
     'GEOSITE,openai,💬 OpenAI',
 
-    // YouTube 必须放在 Google 前面
-    'GEOSITE,youtube,📹 油管视频',
+    'DOMAIN-SUFFIX,gemini.google.com,🌐 AI 宽松',
+    'DOMAIN-SUFFIX,bard.google.com,🌐 AI 宽松',
+    'DOMAIN-SUFFIX,x.ai,🌐 AI 宽松',
+    'DOMAIN-SUFFIX,grok.com,🌐 AI 宽松',
+    'DOMAIN-SUFFIX,poe.com,🌐 AI 宽松',
+    'DOMAIN-SUFFIX,poecdn.net,🌐 AI 宽松',
 
-    // Google
+    'DOMAIN-SUFFIX,anthropic.com,🤖 AI 服务',
+    'DOMAIN-SUFFIX,claude.ai,🤖 AI 服务',
+    'DOMAIN-SUFFIX,claude.com,🤖 AI 服务',
+    'DOMAIN-SUFFIX,claudeusercontent.com,🤖 AI 服务',
+    'DOMAIN-SUFFIX,clau.de,🤖 AI 服务',
+    'DOMAIN-SUFFIX,aistudio.google.com,🤖 AI 服务',
+    'DOMAIN-SUFFIX,makersuite.google.com,🤖 AI 服务',
+    'DOMAIN-SUFFIX,notebooklm.google.com,🤖 AI 服务',
+    'DOMAIN-SUFFIX,notebooklm.google,🤖 AI 服务',
+    'DOMAIN-SUFFIX,generativelanguage.googleapis.com,🤖 AI 服务',
+    'DOMAIN-SUFFIX,alkalimakersuite-pa.clients6.google.com,🤖 AI 服务',
+    'DOMAIN-SUFFIX,proactivebackend-pa.googleapis.com,🤖 AI 服务',
+    'DOMAIN-SUFFIX,ai.google.dev,🤖 AI 服务',
+    'DOMAIN-SUFFIX,deepmind.com,🤖 AI 服务',
+    'DOMAIN-SUFFIX,deepmind.google,🤖 AI 服务',
+    'DOMAIN-SUFFIX,perplexity.ai,🤖 AI 服务',
+    'DOMAIN-SUFFIX,pplx.ai,🤖 AI 服务',
+    'DOMAIN-SUFFIX,cursor.com,🤖 AI 服务',
+    'DOMAIN-SUFFIX,cursor.sh,🤖 AI 服务',
+    'DOMAIN-SUFFIX,cursorapi.com,🤖 AI 服务',
+    'DOMAIN-SUFFIX,githubcopilot.com,🤖 AI 服务',
+    'DOMAIN-SUFFIX,copilot.microsoft.com,🤖 AI 服务',
+    'DOMAIN-SUFFIX,character.ai,🤖 AI 服务',
+    'DOMAIN-SUFFIX,midjourney.com,🤖 AI 服务',
+    'DOMAIN-SUFFIX,huggingface.co,🤖 AI 服务',
+    'DOMAIN-SUFFIX,mistral.ai,🤖 AI 服务',
+    'DOMAIN-SUFFIX,openrouter.ai,🤖 AI 服务',
+    'DOMAIN-SUFFIX,elevenlabs.io,🤖 AI 服务',
+    'DOMAIN-SUFFIX,suno.com,🤖 AI 服务',
+    'DOMAIN-SUFFIX,suno.ai,🤖 AI 服务',
+
+    'GEOSITE,youtube,📹 油管视频',
     'GEOSITE,google,🔎 Google',
 
-    // GitHub
     'DOMAIN-SUFFIX,github.com,💻 GitHub',
     'DOMAIN-SUFFIX,githubusercontent.com,💻 GitHub',
     'DOMAIN-SUFFIX,githubassets.com,💻 GitHub',
     'GEOSITE,github,💻 GitHub',
 
-    // Pixiv / FANBOX
     'DOMAIN-SUFFIX,pixiv.net,🎨 Pixiv',
     'DOMAIN-SUFFIX,pximg.net,🎨 Pixiv',
     'DOMAIN-SUFFIX,fanbox.cc,🎨 Pixiv',
     'DOMAIN-SUFFIX,ads-pixiv.net,🎨 Pixiv',
 
-    // Steam 国内下载 / CDN：直连
     'DOMAIN,csgo.wmsj.cn,DIRECT',
     'DOMAIN,dl.steam.clngaa.com,DIRECT',
     'DOMAIN,dl.steam.ksyna.com,DIRECT',
@@ -273,22 +223,18 @@ function main(config) {
     'DOMAIN-SUFFIX,steamcontent.com,DIRECT',
     'DOMAIN-SUFFIX,steamusercontent.com,DIRECT',
 
-    // Steam 商店 / 社区 / 创意工坊
-    'GEOSITE,steam,🎮 Steam',
-
-    // 其他游戏平台
-    'GEOSITE,epicgames,🎮 Epic Games',
-    'GEOSITE,origin,⚡ EA / Origin',
-    'GEOSITE,ea,⚡ EA / Origin',
-    'GEOSITE,xbox,🟩 Xbox',
-    'GEOSITE,sony,🎮 PlayStation',
-    'GEOSITE,playstation,🎮 PlayStation',
-    'GEOSITE,nintendo,🕹️ Nintendo'
+    'GEOSITE,steam,🎮 游戏服务',
+    'GEOSITE,epicgames,🎮 游戏服务',
+    'GEOSITE,origin,🎮 游戏服务',
+    'GEOSITE,ea,🎮 游戏服务',
+    'GEOSITE,xbox,🎮 游戏服务',
+    'GEOSITE,sony,🎮 游戏服务',
+    'GEOSITE,playstation,🎮 游戏服务',
+    'GEOSITE,nintendo,🎮 游戏服务'
   ];
 
   const oldRules = Array.isArray(config.rules) ? config.rules : [];
   const seenRules = new Set();
-
   config.rules = prependRules.concat(oldRules).filter(function (rule) {
     if (seenRules.has(rule)) return false;
     seenRules.add(rule);
