@@ -46,6 +46,14 @@ grep -q 'openclash_node_watchdog.lua' /etc/crontabs/root || \
 logread | grep openclash-watchdog
 ```
 
+### 当前分流结构
+
+- `💬 OpenAI`：独立保障，默认美国。
+- `🤖 AI 服务`：严格 AI，默认美国；用于 Claude、AI Studio / Gemini API、NotebookLM 及尚未确认香港支持的 AI。
+- `🌐 AI 宽松`：默认香港；用于 Gemini 网页版、Grok、Poe 等已确认香港可用的服务。
+- `🎮 游戏服务`：Steam / Epic / EA / Xbox / PlayStation / Nintendo 统一分组，默认香港；Steam 下载/CDN 与 PS5 游戏/系统更新继续按前置规则直连。
+- `🔎 Google` 与 `📹 油管视频` 继续独立。
+
 ## Android 端（FlClash / Mihomo）
 
 JavaScript 覆写：
@@ -62,7 +70,7 @@ JavaScript 覆写：
 
 https://raw.githubusercontent.com/Clyne-Qi/ClashRules/main/ClashParty_PC_Override.js
 
-PC 端已同步当前路由器端分流逻辑：动态生成地区节点组，统一使用 OpenAI、Google、YouTube、GitHub、Pixiv、Steam 与各游戏平台的独立策略组；并额外将 PS Remote Play 的 `RemotePlay.exe` 强制直连。
+PC 端已同步当前路由器端分流逻辑：OpenAI 独立保障；AI 分为严格与香港宽松两组；Steam / Epic / EA / Xbox / PlayStation / Nintendo 统一并入 `🎮 游戏服务`，默认香港；并额外将 PS Remote Play 的 `RemotePlay.exe` 强制直连。
 
 ## 旧版完整配置
 
