@@ -17,12 +17,15 @@ ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='Ⓜ️ 微软服
 ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='📲 电报信息'}['proxies']" "['🔰 节点选择','🇭🇰 香港节点','🇺🇸 美国节点','🇯🇵 日本节点','🇨🇳 台湾节点','🇸🇬 新加坡节点','🇲🇾 马来西亚节点','🇰🇷 韩国节点','♻️ 自动选择','🎯 全球直连']"
 ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🍎 苹果服务'}['proxies']" "['🔰 节点选择','🇭🇰 香港节点','🇺🇸 美国节点','🇯🇵 日本节点','🇨🇳 台湾节点','🇸🇬 新加坡节点','🇲🇾 马来西亚节点','🇰🇷 韩国节点','♻️ 自动选择','🎯 全球直连']"
 ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🎯 全球直连'}['proxies']" "['DIRECT','🔰 节点选择','🇭🇰 香港节点','🇺🇸 美国节点','🇯🇵 日本节点','🇨🇳 台湾节点','🇸🇬 新加坡节点','🇲🇾 马来西亚节点','🇰🇷 韩国节点']"
-ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🛑 全球拦截'}['proxies']" "['🔰 节点选择','REJECT','DIRECT','🇭🇰 香港节点','🇺🇸 美国节点','🇯🇵 日本节点','🇨🇳 台湾节点','🇸🇬 新加坡节点','🇲🇾 马来西亚节点','🇰🇷 韩国节点']"
+ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🛑 全球拦截'}['proxies']" "['REJECT','DIRECT','🔰 节点选择','♻️ 自动选择','🇭🇰 香港节点','🇺🇸 美国节点','🇯🇵 日本节点','🇨🇳 台湾节点','🇸🇬 新加坡节点','🇲🇾 马来西亚节点','🇰🇷 韩国节点']"
 ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🐟 漏网之鱼'}['proxies']" "['🔰 节点选择','🇭🇰 香港节点','🇺🇸 美国节点','🇯🇵 日本节点','🇨🇳 台湾节点','🇸🇬 新加坡节点','🇲🇾 马来西亚节点','🇰🇷 韩国节点','♻️ 自动选择','🎯 全球直连']"
 
 # 机场新增“🤖 AI 服务”：限制为官方支持更稳的地区，第一项默认美国。
 # 已确认香港可用的 AI 会由前置规则分流到“🌐 AI 宽松”。
 ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🤖 AI 服务'}['proxies']" "['🇺🇸 美国节点','🇯🇵 日本节点','🇸🇬 新加坡节点','🇨🇳 台湾节点','🇰🇷 韩国节点']"
+
+# 策略组显示顺序：地区组紧跟在“♻️ 自动选择”后面，方便直接测速/切换。
+ruby_edit "$CONFIG_FILE" "['proxy-groups']" "begin regions=['🇭🇰 香港节点','🇺🇸 美国节点','🇯🇵 日本节点','🇨🇳 台湾节点','🇸🇬 新加坡节点','🇲🇾 马来西亚节点','🇰🇷 韩国节点']; gs=Value||[]; moved=gs.select{|g| g.is_a?(Hash) && regions.include?(g['name'])}; rest=gs.reject{|g| g.is_a?(Hash) && regions.include?(g['name'])}; idx=rest.index{|g| g.is_a?(Hash) && g['name']=='♻️ 自动选择'}; idx ? rest[0..idx]+moved+rest[(idx+1)..-1].to_a : rest+moved end"
 [YAML]
 
 # ============================================================
@@ -39,7 +42,8 @@ ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🤖 AI 服务'}
 # 5. Steam / Epic / EA / Xbox / PlayStation / Nintendo 合并为“🎮 游戏服务”，默认香港。
 # 6. Steam 国内下载/CDN 直连；PS5（192.168.6.250）游戏下载/系统更新直连，
 #    其余 PS5 TCP / UDP 流量走“🎮 游戏服务”。
-# 7. 外网 Dashboard CORS 使用通配 Origin；实际安全仍依赖 Controller secret 等鉴权。
+# 7. 策略组显示顺序将地区组移动到“♻️ 自动选择”之后；“🛑 全球拦截”默认 REJECT。
+# 8. 外网 Dashboard CORS 使用通配 Origin；实际安全仍依赖 Controller secret 等鉴权。
 # ============================================================
 
 # 家中访问 clyne.top:5001 时直连 NAS，避开公网地址回流。
