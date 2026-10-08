@@ -24,8 +24,11 @@ ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🐟 漏网之�
 # 已确认香港可用的 AI 会由前置规则分流到“🌐 AI 宽松”。
 ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🤖 AI 服务'}['proxies']" "['🇺🇸 美国节点','🇯🇵 日本节点','🇸🇬 新加坡节点','🇨🇳 台湾节点','🇰🇷 韩国节点']"
 
+# 动态公网 IP 远程 Dashboard：通过 Ruby 写入 CORS，避免覆写模块 YAML 对 "*" 的解析兼容问题。
+ruby_edit "$CONFIG_FILE" "['external-controller-cors']" "{'allow-origins'=>['*'],'allow-private-network'=>true}"
+
 # 策略组显示顺序：地区组紧跟在“♻️ 自动选择”后面，方便直接测速/切换。
-ruby_edit "$CONFIG_FILE" "['proxy-groups']" "begin regions=['🇭🇰 香港节点','🇺🇸 美国节点','🇯🇵 日本节点','🇨🇳 台湾节点','🇸🇬 新加坡节点','🇲🇾 马来西亚节点','🇰🇷 韩国节点']; gs=Value||[]; moved=gs.select{|g| g.is_a?(Hash) && regions.include?(g['name'])}; rest=gs.reject{|g| g.is_a?(Hash) && regions.include?(g['name'])}; idx=rest.index{|g| g.is_a?(Hash) && g['name']=='♻️ 自动选择'}; idx ? rest[0..idx]+moved+rest[(idx+1)..-1].to_a : rest+moved end"
+ruby_edit "$CONFIG_FILE" "['proxy-groups']" "begin regions=['🇭🇰 香港节点','🇺🇸 美国节点','🇯🇵 日本节点','🇨🇳 台湾节点','🇸🇬 新加坡节点','🇲🇾 马来西亚节点','🇰🇷 韩国节点']; gs=(Value['proxy-groups']||[]); moved=gs.select{|g| g.is_a?(Hash) && regions.include?(g['name'])}; rest=gs.reject{|g| g.is_a?(Hash) && regions.include?(g['name'])}; idx=rest.index{|g| g.is_a?(Hash) && g['name']=='♻️ 自动选择'}; idx ? rest[0..idx]+moved+rest[(idx+1)..-1].to_a : rest+moved end"
 [YAML]
 
 # ============================================================
@@ -43,7 +46,7 @@ ruby_edit "$CONFIG_FILE" "['proxy-groups']" "begin regions=['🇭🇰 香港节�
 # 6. Steam 国内下载/CDN 直连；PS5（192.168.6.250）游戏下载/系统更新直连，
 #    其余 PS5 TCP / UDP 流量走“🎮 游戏服务”。
 # 7. 策略组显示顺序将地区组移动到“♻️ 自动选择”之后；“🛑 全球拦截”默认 REJECT。
-# 8. 外网 Dashboard CORS 使用通配 Origin；实际安全仍依赖 Controller secret 等鉴权。
+# 8. 外网 Dashboard CORS 通过 [Overwrite] Ruby 写入通配 Origin；实际安全仍依赖 Controller secret 等鉴权。
 # ============================================================
 
 # 家中访问 clyne.top:5001 时直连 NAS，避开公网地址回流。
@@ -53,12 +56,6 @@ dns:
   use-hosts: true
   fake-ip-filter+:
     - clyne.top
-
-# 允许动态公网 IP 打开的 Dashboard 调用 Mihomo Controller。
-external-controller-cors:
-  allow-origins:
-    - "*"
-  allow-private-network: true
 
 proxy-groups+:
 
