@@ -188,6 +188,12 @@ proxy-groups+:
   # 家中访问自建域名时走内网 NAS。
   - DOMAIN,clyne.top,DIRECT
 
+  # NAS qBittorrent（192.168.6.100）：
+  # 8085 为 Web UI；20000 为 BT 监听端口（TCP/UDP）。
+  # 对涉及这两个源/目标端口的 NAS 流量强制 DIRECT，避免误入机场代理。
+  - AND,((SRC-IP-CIDR,192.168.6.100/32),(SRC-PORT,8085/20000)),DIRECT
+  - AND,((SRC-IP-CIDR,192.168.6.100/32),(DST-PORT,8085/20000)),DIRECT
+
   # PS5（192.168.6.250）：
   # 家庭局域网直连；游戏下载/系统更新直连；其余商店/登录/联机等走游戏组。
   - AND,((SRC-IP-CIDR,192.168.6.250/32),(IP-CIDR,192.168.6.0/24)),DIRECT
