@@ -122,6 +122,9 @@ function main(config) {
   setGroupChoices('🛑 全球拦截', ['REJECT', 'DIRECT', mainGroupName, autoGroupName].concat(REGION_NAMES));
   setGroupChoices('🐟 漏网之鱼', [mainGroupName].concat(REGION_NAMES).concat([autoGroupName, existing('🎯 全球直连')]));
 
+  // 保留机场原版 AI 策略组，仅把可选项整理为地区大组。
+  setGroupChoices('🤖 AI 服务', ['🇺🇸 美国节点','🇯🇵 日本节点','🇭🇰 香港节点','🇸🇬 新加坡节点','🇨🇳 台湾节点','🇰🇷 韩国节点','🇲🇾 马来西亚节点']);
+
   const commonChoices = unique([mainGroupName].concat(REGION_NAMES).concat([autoGroupName, 'DIRECT']));
   const gameChoices = ['🇭🇰 香港节点','🇯🇵 日本节点','🇺🇸 美国节点','🇨🇳 台湾节点','🇸🇬 新加坡节点','🇲🇾 马来西亚节点','🇰🇷 韩国节点',mainGroupName,autoGroupName,'DIRECT'];
 
