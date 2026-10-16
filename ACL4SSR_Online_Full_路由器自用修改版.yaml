@@ -20,9 +20,6 @@ ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🎯 全球直�
 ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🛑 全球拦截'}['proxies']" "['REJECT','DIRECT','🔰 节点选择','♻️ 自动选择','🇭🇰 香港节点','🇺🇸 美国节点','🇯🇵 日本节点','🇨🇳 台湾节点','🇸🇬 新加坡节点','🇲🇾 马来西亚节点','🇰🇷 韩国节点']"
 ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🐟 漏网之鱼'}['proxies']" "['🔰 节点选择','🇭🇰 香港节点','🇺🇸 美国节点','🇯🇵 日本节点','🇨🇳 台湾节点','🇸🇬 新加坡节点','🇲🇾 马来西亚节点','🇰🇷 韩国节点','♻️ 自动选择','🎯 全球直连']"
 
-# 机场新增“🤖 AI 服务”：限制为官方支持更稳的地区，第一项默认美国。
-# 已确认香港可用的 AI 会由前置规则分流到“🌐 AI 宽松”。
-ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🤖 AI 服务'}['proxies']" "['🇺🇸 美国节点','🇯🇵 日本节点','🇸🇬 新加坡节点','🇨🇳 台湾节点','🇰🇷 韩国节点']"
 
 # 动态公网 IP 远程 Dashboard：通过 Ruby 写入 CORS，避免覆写模块 YAML 对 "*" 的解析兼容问题。
 ruby_edit "$CONFIG_FILE" "['external-controller-cors']" "{'allow-origins'=>['*'],'allow-private-network'=>true}"
@@ -42,11 +39,11 @@ ruby_edit "$CONFIG_FILE" "['proxy-groups']" "begin regions=['🇭🇰 香港节�
 #    - 🤖 AI 服务：严格 AI，默认美国，不提供香港；
 #    - 🌐 AI 宽松：已确认香港可用的 AI，默认香港。
 # 4. 普通 Google / YouTube / GitHub / Pixiv 继续独立分流。
-# 5. Steam / Epic / EA / Xbox / PlayStation / Nintendo 合并为“🎮 游戏服务”，默认香港。
-# 6. Steam 国内下载/CDN 直连；PS5（192.168.6.250）游戏下载/系统更新直连，
+# 6. Steam / Epic / EA / Xbox / PlayStation / Nintendo 合并为“🎮 游戏服务”，默认香港。
+# 7. Steam 国内下载/CDN 直连；PS5（192.168.6.250）游戏下载/系统更新直连，
 #    其余 PS5 TCP / UDP 流量走“🎮 游戏服务”。
-# 7. 策略组显示顺序将地区组移动到“♻️ 自动选择”之后；“🛑 全球拦截”默认 REJECT。
-# 8. 外网 Dashboard CORS 通过 [Overwrite] Ruby 写入通配 Origin；实际安全仍依赖 Controller secret 等鉴权。
+# 8. 策略组显示顺序将地区组移动到“♻️ 自动选择”之后；“🛑 全球拦截”默认 REJECT。
+# 9. 外网 Dashboard CORS 通过 [Overwrite] Ruby 写入通配 Origin；实际安全仍依赖 Controller secret 等鉴权。
 # ============================================================
 
 # 家中访问 clyne.top:5001 时直连 NAS，避开公网地址回流。
@@ -59,28 +56,7 @@ dns:
 
 proxy-groups+:
 
-  # OpenAI / ChatGPT：独立保障；第一项即默认美国。
-  - name: 💬 OpenAI
-    type: select
-    proxies:
-      - 🇺🇸 美国节点
-      - 🇯🇵 日本节点
-      - 🇸🇬 新加坡节点
-      - 🇨🇳 台湾节点
-      - 🇰🇷 韩国节点
-
-  # 已确认香港可用的 AI：Gemini 网页版 / Grok / Poe。
-  - name: 🌐 AI 宽松
-    type: select
-    proxies:
-      - 🇭🇰 香港节点
-      - 🇺🇸 美国节点
-      - 🇯🇵 日本节点
-      - 🇸🇬 新加坡节点
-      - 🇨🇳 台湾节点
-      - 🇰🇷 韩国节点
-
-  # 普通 Google：Google AI 域名会在 rules 中提前分流。
+  # 普通 Google：AI 域名会在 rules 中提前送往机场原版“🤖 AI 服务”。
   - name: 🔎 Google
     type: select
     proxies:
@@ -202,29 +178,22 @@ proxy-groups+:
   - AND,((SRC-IP-CIDR,192.168.6.250/32),(NETWORK,UDP)),🎮 游戏服务
   - AND,((SRC-IP-CIDR,192.168.6.250/32),(NETWORK,TCP)),🎮 游戏服务
 
-  # OpenAI / ChatGPT：单独保障。
-  - DOMAIN-SUFFIX,openai.com,💬 OpenAI
-  - DOMAIN-SUFFIX,chatgpt.com,💬 OpenAI
-  - DOMAIN-SUFFIX,chat.com,💬 OpenAI
-  - DOMAIN-SUFFIX,oaistatic.com,💬 OpenAI
-  - DOMAIN-SUFFIX,oaiusercontent.com,💬 OpenAI
-  - DOMAIN-SUFFIX,sora.com,💬 OpenAI
-  - GEOSITE,openai,💬 OpenAI
-
-  # 香港可用 AI：必须放在严格 AI / Google 总规则之前。
-  - DOMAIN-SUFFIX,gemini.google.com,🌐 AI 宽松
-  - DOMAIN-SUFFIX,bard.google.com,🌐 AI 宽松
-  - DOMAIN-SUFFIX,x.ai,🌐 AI 宽松
-  - DOMAIN-SUFFIX,grok.com,🌐 AI 宽松
-  - DOMAIN-SUFFIX,poe.com,🌐 AI 宽松
-  - DOMAIN-SUFFIX,poecdn.net,🌐 AI 宽松
-
-  # 严格 AI：香港不支持/不稳定，或尚未确认香港支持。
+  # AI：统一交给机场原版“🤖 AI 服务”策略组。
+  # 这些前置域名仅用于避免后面的 Google / GitHub 等大规则抢先命中。
+  - DOMAIN-SUFFIX,openai.com,🤖 AI 服务
+  - DOMAIN-SUFFIX,chatgpt.com,🤖 AI 服务
+  - DOMAIN-SUFFIX,chat.com,🤖 AI 服务
+  - DOMAIN-SUFFIX,oaistatic.com,🤖 AI 服务
+  - DOMAIN-SUFFIX,oaiusercontent.com,🤖 AI 服务
+  - DOMAIN-SUFFIX,sora.com,🤖 AI 服务
+  - GEOSITE,openai,🤖 AI 服务
   - DOMAIN-SUFFIX,anthropic.com,🤖 AI 服务
   - DOMAIN-SUFFIX,claude.ai,🤖 AI 服务
   - DOMAIN-SUFFIX,claude.com,🤖 AI 服务
   - DOMAIN-SUFFIX,claudeusercontent.com,🤖 AI 服务
   - DOMAIN-SUFFIX,clau.de,🤖 AI 服务
+  - DOMAIN-SUFFIX,gemini.google.com,🤖 AI 服务
+  - DOMAIN-SUFFIX,bard.google.com,🤖 AI 服务
   - DOMAIN-SUFFIX,aistudio.google.com,🤖 AI 服务
   - DOMAIN-SUFFIX,makersuite.google.com,🤖 AI 服务
   - DOMAIN-SUFFIX,notebooklm.google.com,🤖 AI 服务
@@ -237,11 +206,15 @@ proxy-groups+:
   - DOMAIN-SUFFIX,deepmind.google,🤖 AI 服务
   - DOMAIN-SUFFIX,perplexity.ai,🤖 AI 服务
   - DOMAIN-SUFFIX,pplx.ai,🤖 AI 服务
+  - DOMAIN-SUFFIX,x.ai,🤖 AI 服务
+  - DOMAIN-SUFFIX,grok.com,🤖 AI 服务
   - DOMAIN-SUFFIX,cursor.com,🤖 AI 服务
   - DOMAIN-SUFFIX,cursor.sh,🤖 AI 服务
   - DOMAIN-SUFFIX,cursorapi.com,🤖 AI 服务
   - DOMAIN-SUFFIX,githubcopilot.com,🤖 AI 服务
   - DOMAIN-SUFFIX,copilot.microsoft.com,🤖 AI 服务
+  - DOMAIN-SUFFIX,poe.com,🤖 AI 服务
+  - DOMAIN-SUFFIX,poecdn.net,🤖 AI 服务
   - DOMAIN-SUFFIX,character.ai,🤖 AI 服务
   - DOMAIN-SUFFIX,midjourney.com,🤖 AI 服务
   - DOMAIN-SUFFIX,huggingface.co,🤖 AI 服务
