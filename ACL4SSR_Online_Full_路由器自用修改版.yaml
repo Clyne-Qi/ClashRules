@@ -20,6 +20,9 @@ ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🎯 全球直�
 ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🛑 全球拦截'}['proxies']" "['REJECT','DIRECT','🔰 节点选择','♻️ 自动选择','🇭🇰 香港节点','🇺🇸 美国节点','🇯🇵 日本节点','🇨🇳 台湾节点','🇸🇬 新加坡节点','🇲🇾 马来西亚节点','🇰🇷 韩国节点']"
 ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🐟 漏网之鱼'}['proxies']" "['🔰 节点选择','🇭🇰 香港节点','🇺🇸 美国节点','🇯🇵 日本节点','🇨🇳 台湾节点','🇸🇬 新加坡节点','🇲🇾 马来西亚节点','🇰🇷 韩国节点','♻️ 自动选择','🎯 全球直连']"
 
+# AI 服务保留机场原版策略组，只把可选项整理为地区大组，避免显示具体节点和套餐信息。
+ruby_edit "$CONFIG_FILE" "['proxy-groups'].find{|g| g['name']=='🤖 AI 服务'}['proxies']" "['🇺🇸 美国节点','🇯🇵 日本节点','🇭🇰 香港节点','🇸🇬 新加坡节点','🇨🇳 台湾节点','🇰🇷 韩国节点','🇲🇾 马来西亚节点']"
+
 
 # 动态公网 IP 远程 Dashboard：通过 Ruby 写入 CORS，避免覆写模块 YAML 对 "*" 的解析兼容问题。
 ruby_edit "$CONFIG_FILE" "['external-controller-cors']" "{'allow-origins'=>['*'],'allow-private-network'=>true}"
@@ -34,7 +37,7 @@ ruby_edit "$CONFIG_FILE" "['proxy-groups']" "begin regions=['🇭🇰 香港节�
 # 设计：
 # 1. 保留机场订阅原有节点、策略组与 rules。
 # 2. 地区组和总选择由 [Overwrite] 从机场真实 proxies 动态生成。
-# 3. AI 完全使用机场原版“🤖 AI 服务”策略组，不创建、不改写额外 AI 策略组。
+# 3. AI 使用机场原版“🤖 AI 服务”策略组；仅将可选项整理为地区大组，不创建额外 AI 策略组。
 # 4. 仅保留指向机场“🤖 AI 服务”的前置 AI 域名规则，避免 Google / GitHub 等大规则抢先命中。
 # 5. 普通 Google / YouTube / GitHub / Pixiv 继续独立分流。
 # 6. Steam / Epic / EA / Xbox / PlayStation / Nintendo 合并为“🎮 游戏服务”，默认香港。
