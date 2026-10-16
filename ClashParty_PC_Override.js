@@ -1,5 +1,5 @@
 // Clash Party / Mihomo PC 端覆写
-// 与路由器端当前逻辑同步：地区组、三层 AI 分流、统一游戏平台分流。
+// 与路由器端当前逻辑同步：地区组、机场原版 AI 分流、统一游戏平台分流。
 // PC 专用：PS Remote Play（RemotePlay.exe）强制 DIRECT。
 // 不写死家庭内网 hosts，避免离开家庭网络后受影响。
 
@@ -33,9 +33,6 @@ function main(config) {
   ];
 
   const CUSTOM_GROUPS = [
-    '💬 OpenAI',
-    '🤖 AI 服务',
-    '🌐 AI 宽松',
     '🔎 Google',
     '📹 油管视频',
     '💻 GitHub',
@@ -126,14 +123,9 @@ function main(config) {
   setGroupChoices('🛑 全球拦截', ['REJECT', 'DIRECT', mainGroupName, autoGroupName].concat(REGION_NAMES));
   setGroupChoices('🐟 漏网之鱼', [mainGroupName].concat(REGION_NAMES).concat([autoGroupName, existing('🎯 全球直连')]));
 
-  const strictAi = ['🇺🇸 美国节点','🇯🇵 日本节点','🇸🇬 新加坡节点','🇨🇳 台湾节点','🇰🇷 韩国节点'];
-  const relaxedAi = ['🇭🇰 香港节点'].concat(strictAi);
   const commonChoices = unique([mainGroupName].concat(REGION_NAMES).concat([autoGroupName, 'DIRECT']));
   const gameChoices = ['🇭🇰 香港节点','🇯🇵 日本节点','🇺🇸 美国节点','🇨🇳 台湾节点','🇸🇬 新加坡节点','🇲🇾 马来西亚节点','🇰🇷 韩国节点',mainGroupName,autoGroupName,'DIRECT'];
 
-  groups.push({ name:'💬 OpenAI', type:'select', proxies:strictAi.slice() });
-  groups.push({ name:'🤖 AI 服务', type:'select', proxies:strictAi.slice() });
-  groups.push({ name:'🌐 AI 宽松', type:'select', proxies:relaxedAi.slice() });
   groups.push({ name:'🔎 Google', type:'select', proxies:commonChoices.slice() });
   groups.push({ name:'📹 油管视频', type:'select', proxies:commonChoices.slice() });
   groups.push({ name:'💻 GitHub', type:'select', proxies:commonChoices.slice() });
@@ -164,26 +156,21 @@ function main(config) {
   const prependRules = [
     'PROCESS-NAME,RemotePlay.exe,DIRECT',
 
-    'DOMAIN-SUFFIX,openai.com,💬 OpenAI',
-    'DOMAIN-SUFFIX,chatgpt.com,💬 OpenAI',
-    'DOMAIN-SUFFIX,chat.com,💬 OpenAI',
-    'DOMAIN-SUFFIX,oaistatic.com,💬 OpenAI',
-    'DOMAIN-SUFFIX,oaiusercontent.com,💬 OpenAI',
-    'DOMAIN-SUFFIX,sora.com,💬 OpenAI',
-    'GEOSITE,openai,💬 OpenAI',
-
-    'DOMAIN-SUFFIX,gemini.google.com,🌐 AI 宽松',
-    'DOMAIN-SUFFIX,bard.google.com,🌐 AI 宽松',
-    'DOMAIN-SUFFIX,x.ai,🌐 AI 宽松',
-    'DOMAIN-SUFFIX,grok.com,🌐 AI 宽松',
-    'DOMAIN-SUFFIX,poe.com,🌐 AI 宽松',
-    'DOMAIN-SUFFIX,poecdn.net,🌐 AI 宽松',
-
+    // AI：统一交给机场原版“🤖 AI 服务”策略组
+    'DOMAIN-SUFFIX,openai.com,🤖 AI 服务',
+    'DOMAIN-SUFFIX,chatgpt.com,🤖 AI 服务',
+    'DOMAIN-SUFFIX,chat.com,🤖 AI 服务',
+    'DOMAIN-SUFFIX,oaistatic.com,🤖 AI 服务',
+    'DOMAIN-SUFFIX,oaiusercontent.com,🤖 AI 服务',
+    'DOMAIN-SUFFIX,sora.com,🤖 AI 服务',
+    'GEOSITE,openai,🤖 AI 服务',
     'DOMAIN-SUFFIX,anthropic.com,🤖 AI 服务',
     'DOMAIN-SUFFIX,claude.ai,🤖 AI 服务',
     'DOMAIN-SUFFIX,claude.com,🤖 AI 服务',
     'DOMAIN-SUFFIX,claudeusercontent.com,🤖 AI 服务',
     'DOMAIN-SUFFIX,clau.de,🤖 AI 服务',
+    'DOMAIN-SUFFIX,gemini.google.com,🤖 AI 服务',
+    'DOMAIN-SUFFIX,bard.google.com,🤖 AI 服务',
     'DOMAIN-SUFFIX,aistudio.google.com,🤖 AI 服务',
     'DOMAIN-SUFFIX,makersuite.google.com,🤖 AI 服务',
     'DOMAIN-SUFFIX,notebooklm.google.com,🤖 AI 服务',
@@ -196,11 +183,15 @@ function main(config) {
     'DOMAIN-SUFFIX,deepmind.google,🤖 AI 服务',
     'DOMAIN-SUFFIX,perplexity.ai,🤖 AI 服务',
     'DOMAIN-SUFFIX,pplx.ai,🤖 AI 服务',
+    'DOMAIN-SUFFIX,x.ai,🤖 AI 服务',
+    'DOMAIN-SUFFIX,grok.com,🤖 AI 服务',
     'DOMAIN-SUFFIX,cursor.com,🤖 AI 服务',
     'DOMAIN-SUFFIX,cursor.sh,🤖 AI 服务',
     'DOMAIN-SUFFIX,cursorapi.com,🤖 AI 服务',
     'DOMAIN-SUFFIX,githubcopilot.com,🤖 AI 服务',
     'DOMAIN-SUFFIX,copilot.microsoft.com,🤖 AI 服务',
+    'DOMAIN-SUFFIX,poe.com,🤖 AI 服务',
+    'DOMAIN-SUFFIX,poecdn.net,🤖 AI 服务',
     'DOMAIN-SUFFIX,character.ai,🤖 AI 服务',
     'DOMAIN-SUFFIX,midjourney.com,🤖 AI 服务',
     'DOMAIN-SUFFIX,huggingface.co,🤖 AI 服务',
