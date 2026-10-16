@@ -34,11 +34,9 @@ ruby_edit "$CONFIG_FILE" "['proxy-groups']" "begin regions=['🇭🇰 香港节�
 # 设计：
 # 1. 保留机场订阅原有节点、策略组与 rules。
 # 2. 地区组和总选择由 [Overwrite] 从机场真实 proxies 动态生成。
-# 3. AI 分三层：
-#    - 💬 OpenAI：单独保障，默认美国；
-#    - 🤖 AI 服务：严格 AI，默认美国，不提供香港；
-#    - 🌐 AI 宽松：已确认香港可用的 AI，默认香港。
-# 4. 普通 Google / YouTube / GitHub / Pixiv 继续独立分流。
+# 3. AI 完全使用机场原版“🤖 AI 服务”策略组，不创建、不改写额外 AI 策略组。
+# 4. 仅保留指向机场“🤖 AI 服务”的前置 AI 域名规则，避免 Google / GitHub 等大规则抢先命中。
+# 5. 普通 Google / YouTube / GitHub / Pixiv 继续独立分流。
 # 6. Steam / Epic / EA / Xbox / PlayStation / Nintendo 合并为“🎮 游戏服务”，默认香港。
 # 7. Steam 国内下载/CDN 直连；PS5（192.168.6.250）游戏下载/系统更新直连，
 #    其余 PS5 TCP / UDP 流量走“🎮 游戏服务”。
