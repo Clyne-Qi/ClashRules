@@ -154,6 +154,7 @@ function main(config) {
   config['proxy-groups'] = orderedGroups;
 
   const prependRules = [
+    'DOMAIN-SUFFIX,wenyin123.com,DIRECT',
 
     // AI：统一交给机场原版“🤖 AI 服务”策略组
     'DOMAIN-SUFFIX,openai.com,🤖 AI 服务',
