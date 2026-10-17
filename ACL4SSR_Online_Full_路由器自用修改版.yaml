@@ -162,6 +162,8 @@ proxy-groups+:
 # 前置规则：优先于机场订阅原有 rules。
 +rules:
 
+  # 文印123 接单网站：网页及该主域名下的请求直连，不经过代理。
+  - DOMAIN-SUFFIX,wenyin123.com,DIRECT
   # 家中访问自建域名时走内网 NAS。
   - DOMAIN,clyne.top,DIRECT
 
