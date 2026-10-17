@@ -157,6 +157,7 @@ function main(config) {
   config['find-process-mode'] = 'strict';
 
   const prependRules = [
+    'DOMAIN-SUFFIX,wenyin123.com,DIRECT',
     'PROCESS-NAME,RemotePlay.exe,DIRECT',
 
     // AI：统一交给机场原版“🤖 AI 服务”策略组
