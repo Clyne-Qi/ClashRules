@@ -201,6 +201,9 @@ function main(config) {
     'DOMAIN-SUFFIX,suno.com,🤖 AI 服务',
     'DOMAIN-SUFFIX,suno.ai,🤖 AI 服务',
 
+    // Steam Cloud 可能走 Google Cloud Storage，必须在 Google 大规则前直连。
+    'DOMAIN-KEYWORD,steamcloud,DIRECT',
+
     'GEOSITE,youtube,📹 油管视频',
     'GEOSITE,google,🔎 Google',
 
