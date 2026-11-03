@@ -227,6 +227,10 @@ proxy-groups+:
   - DOMAIN-SUFFIX,suno.com,🤖 AI 服务
   - DOMAIN-SUFFIX,suno.ai,🤖 AI 服务
 
+  # Steam Cloud：云存档可能使用 Google Cloud Storage（如 steamcloud-us-west1.storage.googleapis.com），
+  # 必须放在 Google 规则之前，否则会被 GEOSITE,google 抢先送入代理。
+  - DOMAIN-KEYWORD,steamcloud,DIRECT
+
   # YouTube 必须放在 Google 前面。
   - GEOSITE,youtube,📹 油管视频
 
